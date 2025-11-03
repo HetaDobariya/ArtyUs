@@ -114,3 +114,18 @@ export const updateUser = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+export const logout = async (req, res) => {
+  try {
+    res.clearCookie('token', {
+      httpOnly: false, // match with how you set it
+      secure: false,   // true in production (HTTPS)
+      sameSite: 'Lax',
+    });
+
+    res.status(200).json({ message: 'Logout successful' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

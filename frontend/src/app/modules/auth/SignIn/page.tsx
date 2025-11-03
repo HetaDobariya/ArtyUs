@@ -26,6 +26,7 @@ export default function SignIn() {
         email,
         password,
       }),
+      credentials: "include"
     });
 
     const data = await response.json();
@@ -42,7 +43,7 @@ export default function SignIn() {
     localStorage.setItem("token", data.token);
 
     // Optional: redirect after successful login
-    router.push('/dashboard')
+    router.push('/')
 
   } catch (error) {
     console.error("Error during login:", error);
