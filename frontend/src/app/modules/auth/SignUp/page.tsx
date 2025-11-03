@@ -4,6 +4,8 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Image1 from '../../../../../public/image/HomeImages/Signup.png';
 import Link from 'next/link';
+import { useRouter } from "next/navigation";
+
 
 export default function SignUp() {
     const [name, setName] = useState('');
@@ -12,17 +14,48 @@ export default function SignUp() {
     const [contactNumber, setContactNumber] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const router = useRouter();
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        // Handle sign-up logic here
-        if (password !== confirmPassword) {
-            alert("Passwords don't match!");
-            return;
-        }
-        console.log('Signing up with:', { name, email, address, contactNumber, password });
-    };
+   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
 
+  if (password !== confirmPassword) {
+    alert("Passwords don't match!");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/signup`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name,
+        email,
+        address,
+        contact: contactNumber,
+        password,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      console.log("Signup successful:", data);
+      alert("Signup successful!");
+      router.push("/modules/auth/SignIn");
+    } else {
+      console.error("Signup failed:", data);
+      alert(data.message || "Signup failed!");
+    }
+  } catch (error) {
+    console.error("Error during signup:", error);
+    alert("Something went wrong. Please try again.");
+  }
+};
+
+    
 
     return (
         <div className="flex min-h-screen p-4 lg:p-0">

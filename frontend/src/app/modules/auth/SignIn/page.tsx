@@ -5,16 +5,51 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Image1 from '../../../../../public/image/HomeImages/login.png';
 import Link from 'next/link'
+import { useRouter } from "next/navigation";
+
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    // Handle login logic here
-    console.log('Logging in with:', { email, password });
-  };
+ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      // Handle errors returned by the backend
+      alert(data.message || "Invalid email or password!");
+      return;
+    }
+
+    console.log("Login successful:", data);
+
+    // Optional: save token or user info to localStorage
+    localStorage.setItem("token", data.token);
+
+    // Optional: redirect after successful login
+    router.push('/dashboard')
+
+  } catch (error) {
+    console.error("Error during login:", error);
+    alert("Something went wrong. Please try again.");
+  }
+};
+
 
   return (
     <div className="flex min-h-screen p-4 lg:p-0">
