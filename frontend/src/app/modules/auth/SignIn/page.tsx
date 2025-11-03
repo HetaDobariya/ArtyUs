@@ -26,6 +26,7 @@ export default function SignIn() {
         email,
         password,
       }),
+      credentials: "include", // Include cookies if needed
     });
 
     const data = await response.json();
