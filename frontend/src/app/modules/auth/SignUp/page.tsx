@@ -25,7 +25,7 @@ export default function SignUp() {
   }
 
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/users/signup`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/signup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -34,7 +34,7 @@ export default function SignUp() {
         name,
         email,
         address,
-        contactNumber,
+        contact: contactNumber,
         password,
       }),
     });
