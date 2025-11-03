@@ -76,13 +76,13 @@ const EditUserDetailsForm: React.FC<EditUserDetailsFormProps> = ({ userId, initi
       
       {/* Note: Email is often read-only */}
       <div className="flex justify-end pt-4">
-        <Button 
+        <button 
           type="submit" 
           disabled={isSubmitting}
           className="bg-black hover:shadow-lg"
         >
           {isSubmitting ? 'Saving...' : 'Save Changes'}
-        </Button>
+        </button>
       </div>
     </form>
   );

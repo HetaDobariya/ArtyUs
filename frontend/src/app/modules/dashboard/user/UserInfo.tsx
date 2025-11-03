@@ -4,17 +4,12 @@ import { useState, useEffect } from 'react';
 import Image1 from '../../../../../public/image/HomeImages/user.png';
 
 // --- Interface for the User Data ---
-interface UserAddress {
-    id: string;
-    address: string;
-    contactNumber: string;
-}
-
 interface UserData {
     id: string;
     name: string;
     email: string;
-    addresses: UserAddress[];
+    address: string;
+    contact: string
 }
 
 type Props = object;
@@ -32,29 +27,58 @@ const UserInfo = (props: Props) => {
         console.log("Edit Details clicked. Opening custom modal.");
     };
 
-    // 2. Fetch data from the REST API endpoint (Placeholder logic)
+    // 2. Fetch data from the REST API endpoint
     useEffect(() => {
         const fetchUserData = async () => {
-            // --- SIMULATED DATA FETCHING ---
             setLoading(true);
-            await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API delay
-            const simulatedData: UserData = {
-                id: 'u123',
-                name: 'vani',
-                email: 'vani@gmail.com',
-                addresses: [{
-                    id: 'a101',
-                    address: 'ahm',
-                    contactNumber: '1234523456',
-                }],
-            };
-            setUserData(simulatedData);
-            // --- END SIMULATED DATA FETCHING ---
-            setLoading(false);
+
+            try {
+                // NOTE: Use the correct backend URL for fetching user data
+                const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/current-user`, {
+                    method: "GET",
+                    // *** CRITICAL CHANGE: This tells the browser to include the auth cookie ***
+                    credentials: 'include',
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    // If the backend returns a 401/403 (unauthorized) because the cookie is missing/expired
+                    if (response.status === 401 || response.status === 403) {
+                        setError("Session expired or unauthorized. Please log in.");
+                        // Optional: redirect to login page if unauthorized
+                        // router.push('/modules/auth/SignIn'); 
+                    } else {
+                        setError(data.message || "Failed to load user data.");
+                    }
+                    return;
+                }
+                console.log(data)
+                // Assuming the data structure returned by the API matches UserData
+                setUserData(data.user);
+
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+                setError("Network error: Could not connect to the API.");
+            } finally {
+                setLoading(false);
+            }
         };
 
-        fetchUserData();
-    }, []);
+        // Only run if the NEXT_PUBLIC_BACKEND environment variable is set
+        if (process.env.NEXT_PUBLIC_BACKEND) {
+            fetchUserData();
+        } else {
+            // Fallback for demonstration if environment variable is not set
+            setUserData({
+                id: 'u123', name: 'vani', email: 'vani@gmail.com',address: 'ahm', contact: '1234523456' 
+            });
+            setLoading(false);
+        }
+    }, []); // Empty dependency array runs once on mount
 
     if (loading) {
         return (
@@ -72,7 +96,7 @@ const UserInfo = (props: Props) => {
         );
     }
 
-    const primaryAddress = userData.addresses?.[0];
+    // const primaryAddress = userData.addresses?.[0];
 
     // Component structure mimicking the provided image
     return (
@@ -97,25 +121,25 @@ const UserInfo = (props: Props) => {
                 <div className="flex flex-col gap-5">
                     {/* Name Field */}
                     <div className="flex flex-col">
-                        <h4 className="text-base text-gray-700">Name: **{userData.name}**</h4>
+                        <h4 className="text-base text-gray-700">Name:{userData?.name}</h4>
                         <div className="h-0.5 w-full bg-gray-300 mt-1"></div>
                     </div>
 
                     {/* Email Field */}
                     <div className="flex flex-col">
-                        <h4 className="text-base text-gray-700">Email: **{userData.email}**</h4>
+                        <h4 className="text-base text-gray-700">Email:{userData.email}</h4>
                         <div className="h-0.5 w-full bg-gray-300 mt-1"></div>
                     </div>
 
                     {/* Address Field */}
                     <div className="flex flex-col">
-                        <h4 className="text-base text-gray-700">Address: **{primaryAddress?.address || 'N/A'}**</h4>
+                        <h4 className="text-base text-gray-700">Address:{userData?.address}</h4>
                         <div className="h-0.5 w-full bg-gray-300 mt-1"></div>
                     </div>
 
                     {/* Contact No Field */}
                     <div className="flex flex-col">
-                        <h4 className="text-base text-gray-700">Contact No: **{primaryAddress?.contactNumber || 'N/A'}**</h4>
+                        <h4 className="text-base text-gray-700">Contact No:{userData?.contact}</h4>
                         <div className="h-0.5 w-full bg-gray-300 mt-1"></div>
                     </div>
 
