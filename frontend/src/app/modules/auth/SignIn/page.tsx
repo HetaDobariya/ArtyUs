@@ -17,7 +17,7 @@ export default function SignIn() {
   e.preventDefault();
 
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/users/login`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
