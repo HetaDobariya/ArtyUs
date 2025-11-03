@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Image1 from '../../../../../public/image/HomeImages/Signup.png';
+import Link from 'next/link';
 
 export default function SignUp() {
     const [name, setName] = useState('');
@@ -113,9 +114,9 @@ export default function SignUp() {
                         </form>
                         <p className="mt-6 text-sm text-center text-gray-600">
                             Already have an account?{' '}
-                            <a href="/signin" className="text-blue-600 hover:underline font-medium">
+                            <Link href="/modules/auth/SignIn" className="text-blue-600 hover:underline font-medium">
                                 Sign In
-                            </a>
+                            </Link>
                         </p>
                     </div>
                 </div>

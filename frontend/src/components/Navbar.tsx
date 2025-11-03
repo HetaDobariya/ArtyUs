@@ -427,13 +427,13 @@ export default function Navigation() {
                       <div className="w-screen max-w-md flex-auto overflow-hidden rounded-3xl bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5">
                         <div className="p-4">
                           <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
-                            <Link href="/auth/SignIn" className="font-semibold text-gray-900">
+                            <Link href="/modules/auth/SignIn" className="font-semibold text-gray-900">
                               Login
                             </Link>
                           </div>
                           <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
-                            <Link href="/auth/SignUp" className="font-semibold text-gray-900">
-                              Sign Up
+                            <Link href="/modules/auth/TraderSignUp" className="font-semibold text-gray-900">
+                              Become a Trader
                             </Link>
                           </div>
                         </div>

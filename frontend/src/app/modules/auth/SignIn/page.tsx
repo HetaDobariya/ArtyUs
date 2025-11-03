@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Image1 from '../../../../../public/image/HomeImages/login.png';
+import Link from 'next/link'
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
@@ -57,9 +58,9 @@ export default function SignIn() {
             </form>
             <p className="mt-6 text-sm text-center text-gray-600">
               Don&apos;t have an account?{' '}
-              <a href="#" className="text-blue-600 hover:underline font-medium">
+              <Link href="/modules/auth/SignUp" className="text-blue-600 hover:underline font-medium">
                 Sign Up
-              </a>
+              </Link>
             </p>
           </div>
         </div>
