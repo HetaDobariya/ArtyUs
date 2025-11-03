@@ -22,7 +22,7 @@ export default function SignUp() {
         }
         console.log('Signing up with:', { name, email, address, contactNumber, password });
     };
-    
+
 
     return (
         <div className="flex min-h-screen p-4 lg:p-0">
