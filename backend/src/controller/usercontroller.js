@@ -1,4 +1,4 @@
-import { findUserByEmail, createUser, updateUserById  } from '../models/usermodel.js';
+import { findUserByEmail, createUser, updateUserById , findTraderByUserId  } from '../models/usermodel.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
@@ -51,13 +51,30 @@ export const login = async (req, res) => {
 
      const role = existingUser.is_trader === 1 ? 'trader' : 'user';
 
-     const userPayload = {
+     let userPayload = {
         id: existingUser.id,
         name: existingUser.name,
         email: existingUser.email,
         address: existingUser.address,
         contact: existingUser.contact,
       };
+
+       if (role === 'trader') {
+      const traderDetails = await findTraderByUserId(existingUser.id);
+
+      if (traderDetails) {
+        userPayload = {
+          ...userPayload,
+          trader: {
+            trader_id: traderDetails.id,
+            business_name: traderDetails.shop_name,
+            shop_address: traderDetails.address,
+            phone: traderDetails.contact,
+            description: traderDetails.description,
+          },
+        };
+      }
+    }
 
       const token = jwt.sign(userPayload, SECRET_KEY, { expiresIn: '1h' });
 
@@ -77,7 +94,7 @@ export const login = async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
+    console.log(error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
@@ -111,6 +128,21 @@ export const updateUser = async (req, res) => {
     res.status(200).json({ message: 'User updated successfully' });
   } catch (error) {
     console.error('Error updating user:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const logout = async (req, res) => {
+  try {
+    res.clearCookie('token', {
+      httpOnly: false, // match with how you set it
+      secure: false,   // true in production (HTTPS)
+      sameSite: 'Lax',
+    });
+
+    res.status(200).json({ message: 'Logout successful' });
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

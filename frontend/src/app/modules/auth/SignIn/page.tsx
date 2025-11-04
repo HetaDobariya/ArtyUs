@@ -111,7 +111,16 @@ export default function SignIn() {
         {/* Right Side: Illustration */}
         <div className="hidden lg:flex w-full lg:w-1/2 items-center justify-center p-8">
           <div className="w-full h-full relative">
+<<<<<<< HEAD
             <Image src={Image1} alt="profile" className="object-contain w-[739px]" />
+=======
+            {/* This is a placeholder for your image. Replace '/illustration.svg' with your image path */}
+            <Image
+              src={Image1}
+              alt="profile"
+              className="object-contain  w-[739px]"
+            />
+>>>>>>> origin/om-dev
           </div>
         </div>
       </div>

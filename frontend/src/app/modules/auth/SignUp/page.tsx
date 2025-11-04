@@ -16,46 +16,46 @@ export default function SignUp() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const router = useRouter();
 
-   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
 
-  if (password !== confirmPassword) {
-    alert("Passwords don't match!");
-    return;
-  }
+        if (password !== confirmPassword) {
+            alert("Passwords don't match!");
+            return;
+        }
 
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/signup`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name,
-        email,
-        address,
-        contact: contactNumber,
-        password,
-      }),
-    });
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/signup`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    name,
+                    email,
+                    address,
+                    contact: contactNumber,
+                    password,
+                }),
+            });
 
-    const data = await res.json();
+            const data = await res.json();
 
-    if (res.ok) {
-      console.log("Signup successful:", data);
-      alert("Signup successful!");
-      router.push("/modules/auth/SignIn");
-    } else {
-      console.error("Signup failed:", data);
-      alert(data.message || "Signup failed!");
-    }
-  } catch (error) {
-    console.error("Error during signup:", error);
-    alert("Something went wrong. Please try again.");
-  }
-};
+            if (res.ok) {
+                console.log("Signup successful:", data);
+                alert("Signup successful!");
+                router.push("/");
+            } else {
+                console.error("Signup failed:", data);
+                alert(data.message || "Signup failed!");
+            }
+        } catch (error) {
+            console.error("Error during signup:", error);
+            alert("Something went wrong. Please try again.");
+        }
+    };
 
-    
+
 
     return (
         <div className="flex min-h-screen p-4 lg:p-0">

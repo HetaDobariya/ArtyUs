@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Image1 from '../../../../../public/image/HomeImages/traderSignUp.png';
+import { useRouter } from 'next/navigation';
 
 // Define types for form data
 interface Step1Data {
@@ -37,6 +38,7 @@ export default function TraderSignUp() {
         shopAddress: '',
         description: '',
     });
+    const router = useRouter();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -58,12 +60,34 @@ export default function TraderSignUp() {
         setStep(1);
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
         // Final submission logic
         console.log('Final Form Data:', formData);
-        alert('Sign Up Successful!');
-        // Here you would typically send the data to your backend API
+
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/trader/signup`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                console.log("Trader signup successfull", data);
+                alert('Sign Up Successful!');
+                router.push("/");
+            } else {
+                console.error("Trader signup failed:", data);
+                alert(data.message || "Trader signup failed!");
+            }
+        } catch (error) {
+            console.error('Submission error:', error);
+            alert('An unexpected error occurred during sign up.');
+        }
     };
 
     return (
