@@ -23,3 +23,9 @@ export const createTrader = async ({userId, shopName, shopContactNumber, shopAdd
   const [result] = await pool.query(sql, [userId, shopName,shopContactNumber, shopAddress,description]);
   return result.insertId;
 };
+
+export const updateTraderById = async (id, address, contact, description) => {
+  const sql = 'UPDATE trader SET address = ?, contact = ?, description = ?, updated_at = NOW() WHERE user_id = ?';
+  const [result] = await pool.query(sql, [address, contact, description, id]);
+  return result;
+};
