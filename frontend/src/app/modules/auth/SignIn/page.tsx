@@ -13,8 +13,8 @@ export default function SignIn() {
   const [password, setPassword] = useState('');
   const router = useRouter();
 
- const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/login`, {
@@ -29,13 +29,26 @@ export default function SignIn() {
       credentials: "include"
     });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      // Handle errors returned by the backend
-      alert(data.message || "Invalid email or password!");
-      return;
+      if (!response.ok) {
+        // Handle errors returned by the backend
+        alert(data.message || "Invalid email or password!");
+        return;
+      }
+
+      console.log("Login successful:", data);
+
+      // Optional: save token or user info to localStorage
+      localStorage.setItem("token", data.token);
+
+      router.push('/')
+
+    } catch (error) {
+      console.error("Error during login:", error);
+      alert("Something went wrong. Please try again.");
     }
+<<<<<<< HEAD
 
     console.log("Login successful:", data);
 
@@ -50,6 +63,9 @@ export default function SignIn() {
     alert("Something went wrong. Please try again.");
   }
 };
+=======
+  };
+>>>>>>> origin/heta-dev
 
 
   return (
@@ -100,17 +116,17 @@ export default function SignIn() {
             </p>
           </div>
         </div>
-        
+
         {/* Right Side: Illustration */}
         <div className="hidden lg:flex w-full lg:w-1/2 items-center justify-center p-8">
-            <div className="w-full h-full relative">
-                 {/* This is a placeholder for your image. Replace '/illustration.svg' with your image path */}
-                <Image
-          src={Image1}
-          alt="profile"
-          className="object-contain  w-[739px]"
-        />
-            </div>
+          <div className="w-full h-full relative">
+            {/* This is a placeholder for your image. Replace '/illustration.svg' with your image path */}
+            <Image
+              src={Image1}
+              alt="profile"
+              className="object-contain  w-[739px]"
+            />
+          </div>
         </div>
       </div>
     </div>
