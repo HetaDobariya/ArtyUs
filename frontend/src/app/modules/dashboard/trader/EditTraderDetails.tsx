@@ -27,6 +27,7 @@ const EditTraderDetailsForm: React.FC<EditTraderDetailsFormProps> = ({
 
     const [formData, setFormData] = useState<EditFormData>(initialData);
     const [loading, setLoading] = useState(false);
+    // Use a specific state for network/submission errors
     const [submitError, setSubmitError] = useState<string | null>(null);
 
     // Ensure form data updates if initialData changes
@@ -39,20 +40,25 @@ const EditTraderDetailsForm: React.FC<EditTraderDetailsFormProps> = ({
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
+    /**
+     * Handles the form submission and includes robust error handling to address
+     * the "Unexpected token '<'" JSON parsing issue.
+     */
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setSubmitError(null);
 
+        // API payload structure
         const payload = {
-            business_name: formData.companyName,
-            phone: formData.shopContactNumber,
-            shop_address: formData.shopAddress,
+            contact: formData.shopContactNumber,
+            address: formData.shopAddress,
             description: formData.description,
         };
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/trader/company/${companyId}`, {
+            // NOTE: process.env.NEXT_PUBLIC_BACKEND must be correctly set (e.g., http://localhost:4000/api)
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/trader/update`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
@@ -60,29 +66,61 @@ const EditTraderDetailsForm: React.FC<EditTraderDetailsFormProps> = ({
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to update details on the server.');
+                let errorMessage = `Update failed with status: ${response.status}.`;
+
+                // --- ROBUST ERROR HANDLING LOGIC (The Fix) ---
+                try {
+                    const contentType = response.headers.get("content-type");
+
+                    // 1. Check if the response is JSON (expected API error structure)
+                    if (contentType && contentType.includes("application/json")) {
+                        const errorData = await response.json();
+                        errorMessage = errorData.message || errorMessage;
+                    }
+                    // 2. Handle 404/non-JSON errors (like the HTML error page) gracefully
+                    else {
+                        const text = await response.text();
+                        // This will capture the HTML/text response that was causing the JSON error
+                        if (response.status === 404) {
+                            errorMessage = `Error 404: API endpoint not found. Please verify the backend URL.`;
+                        } else {
+                            // Show a snippet of the response text (e.g., the "<!DOCTYPE" start)
+                            errorMessage = `Server responded with a non-JSON error. Status ${response.status}. Details: ${text.substring(0, 100)}...`;
+                        }
+                    }
+                } catch (jsonParseOrReadError) {
+                    // This catches the original SyntaxError: Unexpected token '<'
+                    console.error('JSON parsing/Response reading failed:', jsonParseOrReadError);
+                    errorMessage = `Fatal Error: The server returned a corrupt or unexpected response (likely HTML). Check the console for details.`;
+                }
+                // --- END ROBUST ERROR HANDLING LOGIC ---
+
+                throw new Error(errorMessage);
             }
 
+            // Success path
             onUpdateSuccess(formData);
-            // onClose(); // onClose is called in onUpdateSuccess
+            // onClose(); // Assuming onUpdateSuccess handles the close
         } catch (err) {
             console.error('Update failed:', err);
-            setSubmitError((err as Error).message || 'An unexpected error occurred during update.');
+            // Display the detailed error message generated above
+            setSubmitError((err as Error).message || 'A network error occurred and the request failed.');
         } finally {
             setLoading(false);
         }
     };
 
+    // --- JSX RENDER ---
     return (
         <div className="p-6 bg-white rounded-lg w-full">
             <h4 className="text-2xl font-bold text-gray-900 mb-6">
                 Edit Details
             </h4>
 
+            {/* Display the custom error message */}
             {submitError && (
                 <div className="p-3 mb-4 text-sm text-red-700 bg-red-100 rounded">
-                    Error: {submitError}
+                    ⚠️ Error: **{submitError}**
                 </div>
             )}
 
@@ -90,14 +128,12 @@ const EditTraderDetailsForm: React.FC<EditTraderDetailsFormProps> = ({
 
                 {/* Shop Name (Read-Only) */}
                 <div>
-                    {/* 👈 Adjusted Label style */}
                     <label className="block text-sm font-semibold text-gray-700 mb-1">Shop Name</label>
                     <input
                         type="text"
                         name="companyName"
                         value={formData.companyName}
                         readOnly
-                        // 👈 CRITICAL CHANGES: Increased padding, light background, rounded-lg for final look
                         className="w-full px-4 py-3 border border-gray-200 bg-gray-100 rounded-lg focus:outline-none"
                         disabled={loading}
                     />
@@ -112,7 +148,6 @@ const EditTraderDetailsForm: React.FC<EditTraderDetailsFormProps> = ({
                         value={formData.shopContactNumber}
                         onChange={handleChange}
                         required
-                        // 👈 CRITICAL CHANGES: Increased padding, rounded-lg
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                         disabled={loading}
                     />
@@ -127,7 +162,6 @@ const EditTraderDetailsForm: React.FC<EditTraderDetailsFormProps> = ({
                         value={formData.shopAddress}
                         onChange={handleChange}
                         required
-                        // 👈 CRITICAL CHANGES: Increased padding, rounded-lg
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                         disabled={loading}
                     />
@@ -140,20 +174,18 @@ const EditTraderDetailsForm: React.FC<EditTraderDetailsFormProps> = ({
                         name="description"
                         value={formData.description}
                         onChange={handleChange}
-                        rows={3} // Keeping 3 rows for better editability, though image is compact
+                        rows={3}
                         required
-                        // 👈 CRITICAL CHANGES: Increased padding, rounded-lg
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 resize-none"
                         disabled={loading}
                     />
                 </div>
 
-                {/* Footer/Action Buttons - Matching the image's specific button styles and spacing */}
-                <div className="flex justify-end space-x-4 pt-4"> 
+                {/* Footer/Action Buttons */}
+                <div className="flex justify-end space-x-4 pt-4">
                     <button
                         type="button"
                         onClick={onClose}
-                        // 👈 Adjusted style for Cancel button (white background, border)
                         className="px-6 py-2 border border-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-50 transition duration-150"
                         disabled={loading}
                     >
@@ -161,7 +193,6 @@ const EditTraderDetailsForm: React.FC<EditTraderDetailsFormProps> = ({
                     </button>
                     <button
                         type="submit"
-                        // 👈 Adjusted style for UPDATE button (black background, strong hover)
                         className="px-6 py-2 bg-black text-white font-semibold rounded-md hover:bg-gray-800 transition duration-150 disabled:opacity-50"
                         disabled={loading}
                     >
