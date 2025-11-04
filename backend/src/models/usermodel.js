@@ -20,3 +20,9 @@ export const updateUserById = async (id, address, contact) => {
   const [result] = await pool.query(sql, [address, contact, id]);
   return result;
 };
+
+export const findTraderByUserId = async (userId) => {
+  const sql = 'SELECT * FROM trader WHERE user_id = ?';
+  const [rows] = await pool.query(sql, [userId]);
+  return rows[0];
+};

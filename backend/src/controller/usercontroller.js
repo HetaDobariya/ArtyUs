@@ -1,4 +1,4 @@
-import { findUserByEmail, createUser, updateUserById  } from '../models/usermodel.js';
+import { findUserByEmail, createUser, updateUserById , findTraderByUserId  } from '../models/usermodel.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
@@ -51,13 +51,30 @@ export const login = async (req, res) => {
 
      const role = existingUser.is_trader === 1 ? 'trader' : 'user';
 
-     const userPayload = {
+     let userPayload = {
         id: existingUser.id,
         name: existingUser.name,
         email: existingUser.email,
         address: existingUser.address,
         contact: existingUser.contact,
       };
+
+       if (role === 'trader') {
+      const traderDetails = await findTraderByUserId(existingUser.id);
+
+      if (traderDetails) {
+        userPayload = {
+          ...userPayload,
+          trader: {
+            trader_id: traderDetails.id,
+            business_name: traderDetails.shop_name,
+            shop_address: traderDetails.address,
+            phone: traderDetails.contact,
+            description: traderDetails.description,
+          },
+        };
+      }
+    }
 
       const token = jwt.sign(userPayload, SECRET_KEY, { expiresIn: '1h' });
 
