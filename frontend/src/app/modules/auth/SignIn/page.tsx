@@ -16,18 +16,18 @@ export default function SignIn() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-  try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email,
-        password,
-      }),
-      credentials: "include"
-    });
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+        credentials: 'include'
+      });
 
       const data = await response.json();
 
@@ -48,24 +48,7 @@ export default function SignIn() {
       console.error("Error during login:", error);
       alert("Something went wrong. Please try again.");
     }
-<<<<<<< HEAD
-
-    console.log("Login successful:", data);
-
-    // Optional: save token or user info to localStorage
-    localStorage.setItem("token", data.token);
-
-    // Optional: redirect after successful login
-    router.push('/')
-
-  } catch (error) {
-    console.error("Error during login:", error);
-    alert("Something went wrong. Please try again.");
-  }
-};
-=======
   };
->>>>>>> origin/heta-dev
 
 
   return (
