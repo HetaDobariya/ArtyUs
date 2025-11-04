@@ -8,7 +8,8 @@ import BusinessIcon from '@mui/icons-material/Business';
 import Image from 'next/image';
 import Link from 'next/link';
 import logo from '../../public/Arty-US_logo.png';
-import { Fragment, useState, useRef, useEffect } from 'react';
+import { Fragment, useState } from 'react';
+import { useUser } from '@/contexts/UserContext'; // Import the useUser hook
 
 const navigation = {
   categories: [
@@ -170,53 +171,15 @@ const navigation = {
   ],
 };
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: 'user' | 'trader';
-  avatar?: string;
-}
-
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
 }
 
 export default function Navigation() {
   const [open, setOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  // Fetch current user data
- useEffect(() => {
-    const fetchCurrentUser = async () => {
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/current-user`, {
-          method: 'GET',
-          credentials: 'include', // send cookie
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          // your backend sends: { user: {...} }
-          if (data.user) setUser(data.user);
-          else setUser(null);
-        } else {
-          setUser(null);
-        }
-      } catch (err) {
-        console.error('Error fetching current user:', err);
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCurrentUser();
-  }, []);
+  
+  // Use the context instead of local state
+  const { user, setUser, loading } = useUser();
 
   // Logout
   const handleLogout = async () => {
@@ -226,7 +189,7 @@ export default function Navigation() {
         credentials: 'include',
       });
       if (res.ok) {
-        setUser(null);
+        setUser(null); // This will update the context and re-render the component
         window.location.href = '/';
       }
     } catch (err) {
@@ -561,8 +524,6 @@ export default function Navigation() {
                   </div>
                 )}
 
-               
-
                 <Popover className="relative">
                   {({ open, close }) => (
                     <>
@@ -590,6 +551,7 @@ export default function Navigation() {
                           />
                           <div className="w-screen max-w-md flex-auto overflow-hidden rounded-3xl bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5 relative">
                             <div className="p-4">
+                              {/* User info in dropdown */}
                              
                               
                               {user ? (
