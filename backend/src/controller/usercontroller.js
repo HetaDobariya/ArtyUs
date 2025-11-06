@@ -57,6 +57,7 @@ export const login = async (req, res) => {
         email: existingUser.email,
         address: existingUser.address,
         contact: existingUser.contact,
+        role: role
       };
 
        if (role === 'trader') {

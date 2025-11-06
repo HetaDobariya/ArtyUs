@@ -4,52 +4,46 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Image1 from '../../../../../public/image/HomeImages/login.png';
-import Link from 'next/link'
-import { useRouter } from "next/navigation";
-
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useUser } from '@/contexts/UserContext';
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const { refetchUser } = useUser();
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
+    setErrorMsg('');
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-        credentials: 'include'
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/login`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        // Handle errors returned by the backend
-        alert(data.message || "Invalid email or password!");
-        return;
+      if (res.ok) {
+        // 🔥 Immediately update context after successful login
+        await refetchUser();
+        router.push('/'); // Redirect to home page
+      } else {
+        const data = await res.json();
+        setErrorMsg(data.message || 'Invalid email or password!');
       }
-
-      console.log("Login successful:", data);
-
-      // Optional: save token or user info to localStorage
-      localStorage.setItem("token", data.token);
-
-      router.push('/')
-
     } catch (error) {
-      console.error("Error during login:", error);
-      alert("Something went wrong. Please try again.");
+      console.error('Login error:', error);
+      setErrorMsg('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
-
 
   return (
     <div className="flex min-h-screen p-4 lg:p-0">
@@ -59,9 +53,12 @@ export default function SignIn() {
           <div className="w-full max-w-sm">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Log In</h2>
             <p className="text-sm text-gray-600 mb-8">Enter details to log in</p>
-            <form onSubmit={handleSubmit} className="w-full space-y-6">
+
+            <form onSubmit={handleLogin} className="w-full space-y-6">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 sr-only">Email</label>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 sr-only">
+                  Email
+                </label>
                 <input
                   id="email"
                   type="email"
@@ -73,7 +70,9 @@ export default function SignIn() {
                 />
               </div>
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 sr-only">Password</label>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 sr-only">
+                  Password
+                </label>
                 <input
                   id="password"
                   type="password"
@@ -84,13 +83,22 @@ export default function SignIn() {
                   required
                 />
               </div>
+
+              {errorMsg && <p className="text-red-500 text-sm text-center">{errorMsg}</p>}
+
               <button
                 type="submit"
-                className="w-full py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 transition duration-200"
+                disabled={loading}
+                className={`w-full py-3 font-semibold rounded-lg text-white transition duration-200 ${
+                  loading
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-gray-900 hover:bg-gray-800 focus:ring-2 focus:ring-gray-500'
+                }`}
               >
-                LOG IN
+                {loading ? 'Logging in...' : 'LOG IN'}
               </button>
             </form>
+
             <p className="mt-6 text-sm text-center text-gray-600">
               Don&apos;t have an account?{' '}
               <Link href="/modules/auth/SignUp" className="text-blue-600 hover:underline font-medium">
@@ -103,12 +111,7 @@ export default function SignIn() {
         {/* Right Side: Illustration */}
         <div className="hidden lg:flex w-full lg:w-1/2 items-center justify-center p-8">
           <div className="w-full h-full relative">
-            {/* This is a placeholder for your image. Replace '/illustration.svg' with your image path */}
-            <Image
-              src={Image1}
-              alt="profile"
-              className="object-contain  w-[739px]"
-            />
+            <Image src={Image1} alt="profile" className="object-contain w-[739px]" />
           </div>
         </div>
       </div>

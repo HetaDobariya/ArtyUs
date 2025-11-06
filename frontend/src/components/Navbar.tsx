@@ -4,10 +4,12 @@ import { Dialog, Popover, Tab, Transition } from '@headlessui/react';
 import { ChevronDownIcon, ShoppingBagIcon } from '@heroicons/react/20/solid';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import BusinessIcon from '@mui/icons-material/Business';
 import Image from 'next/image';
 import Link from 'next/link';
 import logo from '../../public/Arty-US_logo.png';
-import { Fragment, useState, useRef, useEffect } from 'react';
+import { Fragment, useState } from 'react';
+import { useUser } from '@/contexts/UserContext'; // Import the useUser hook
 
 const navigation = {
   categories: [
@@ -175,6 +177,39 @@ function classNames(...classes: string[]) {
 
 export default function Navigation() {
   const [open, setOpen] = useState(false);
+  
+  // Use the context instead of local state
+  const { user, setUser, loading } = useUser();
+
+  // Logout
+  const handleLogout = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (res.ok) {
+        setUser(null); // This will update the context and re-render the component
+        window.location.href = '/';
+      }
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
+  };
+
+  const getUserIcon = () =>
+    user?.role === 'trader' ? (
+      <BusinessIcon className="h-5 w-5" />
+    ) : (
+      <PersonOutlineIcon className="h-5 w-5" />
+    );
+
+  const getUserDisplayName = () => {
+    if (loading) return 'Loading...';
+    if (!user) return null;
+    const firstName = user.name.split(' ')[0];
+    return `Hello, ${firstName}`;
+  };
 
   return (
     <div className="bg-white">
@@ -213,6 +248,21 @@ export default function Navigation() {
                     <XMarkIcon className="h-6 w-6" aria-hidden="true" />
                   </button>
                 </div>
+
+                {/* User info in mobile menu */}
+                {user && (
+                  <div className="px-4 py-3 border-b border-gray-200">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                        {getUserIcon()}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                        <p className="text-xs text-gray-500 capitalize">{user.role}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Mobile Nav Links */}
                 <Tab.Group as="div" className="mt-2">
@@ -287,6 +337,56 @@ export default function Navigation() {
                     ))}
                   </Tab.Panels>
                 </Tab.Group>
+
+                {/* Mobile user menu */}
+                <div className="mt-auto px-4 py-6 space-y-3">
+                  {user ? (
+                    <>
+                      {user.role === 'trader' && (
+                        <Link
+                          href="/trader/profile"
+                          className="block text-sm font-medium text-gray-900 hover:text-indigo-600"
+                          onClick={() => setOpen(false)}
+                        >
+                          Trader Profile
+                        </Link>
+                      )}
+                      <Link
+                        href="/profile"
+                        className="block text-sm font-medium text-gray-900 hover:text-indigo-600"
+                        onClick={() => setOpen(false)}
+                      >
+                        My Profile
+                      </Link>
+                      <button
+                        onClick={() => {
+                          handleLogout();
+                          setOpen(false);
+                        }}
+                        className="block text-sm font-medium text-red-600 hover:text-red-700"
+                      >
+                        Logout
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        href="/modules/auth/SignIn"
+                        className="block text-sm font-medium text-gray-900 hover:text-indigo-600"
+                        onClick={() => setOpen(false)}
+                      >
+                        Login
+                      </Link>
+                      <Link
+                        href="/modules/auth/TraderSignUp"
+                        className="block text-sm font-medium text-gray-900 hover:text-indigo-600"
+                        onClick={() => setOpen(false)}
+                      >
+                        Become a Trader
+                      </Link>
+                    </>
+                  )}
+                </div>
               </Dialog.Panel>
             </Transition.Child>
           </div>
@@ -415,12 +515,21 @@ export default function Navigation() {
 
               {/* Profile + Cart */}
               <div className="ml-auto flex items-center">
+                {/* User greeting */}
+                {user && (
+                  <div className="hidden lg:flex items-center mr-4">
+                    <span className="text-sm font-bold text-gray-700">
+                      {getUserDisplayName()}
+                    </span>
+                  </div>
+                )}
+
                 <Popover className="relative">
                   {({ open, close }) => (
                     <>
                       <Popover.Button className="inline-flex items-center gap-x-1 text-sm font-semibold leading-6 text-gray-900 outline-none hover:text-gray-700">
-                        <span className="p-2 ">
-                          <PersonOutlineIcon />
+                        <span className="p-2">
+                          {getUserIcon()}
                         </span>
                         <ChevronDownIcon className="h-5 w-5" aria-hidden="true" />
                       </Popover.Button>
@@ -434,7 +543,7 @@ export default function Navigation() {
                         leaveFrom="opacity-100 translate-y-0"
                         leaveTo="opacity-0 translate-y-1"
                       >
-                        <Popover.Panel className="absolute left-1/2 z-10 mt-5 flex w-60 max-w-max -translate-x-1/2 px-4">
+                        <Popover.Panel className="absolute right-0 z-10 mt-5 flex w-60 max-w-max px-4">
                           {/* Click outside area */}
                           <div 
                             className="fixed inset-0" 
@@ -442,16 +551,76 @@ export default function Navigation() {
                           />
                           <div className="w-screen max-w-md flex-auto overflow-hidden rounded-3xl bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5 relative">
                             <div className="p-4">
-                              <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
-                                <Link href="/modules/auth/SignIn" className="font-semibold text-gray-900" onClick={close}>
-                                  Login
-                                </Link>
-                              </div>
-                              <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
-                                <Link href="/modules/auth/TraderSignUp" className="font-semibold text-gray-900" onClick={close}>
-                                  Become a Trader
-                                </Link>
-                              </div>
+                              {/* User info in dropdown */}
+                             
+                              
+                              {user ? (
+                                <>
+                                  {/* Trader specific menu items */}
+                                  {user.role === 'trader' && (
+                                    <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
+                                      <Link 
+                                        href="/trader/profile" 
+                                        className="font-semibold text-gray-900 flex items-center gap-2" 
+                                        onClick={close}
+                                      >
+                                        <BusinessIcon className="h-4 w-4" />
+                                        Trader Profile
+                                      </Link>
+                                    </div>
+                                  )}
+                                  
+                                  {/* Common menu items for all users */}
+                                  <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
+                                    <Link 
+                                      href="/profile" 
+                                      className="font-semibold text-gray-900 flex items-center gap-2" 
+                                      onClick={close}
+                                    >
+                                      <PersonOutlineIcon className="h-4 w-4" />
+                                      My Profile
+                                    </Link>
+                                  </div>
+                                  
+                                  {/* Logout */}
+                                  <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
+                                    <button
+                                      onClick={() => {
+                                        handleLogout();
+                                        close();
+                                      }}
+                                      className="font-semibold text-red-600 flex items-center gap-2 w-full text-left"
+                                    >
+                                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                      </svg>
+                                      Logout
+                                    </button>
+                                  </div>
+                                </>
+                              ) : (
+                                /* Show login options when user is not logged in */
+                                <>
+                                  <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
+                                    <Link 
+                                      href="/modules/auth/SignIn" 
+                                      className="font-semibold text-gray-900" 
+                                      onClick={close}
+                                    >
+                                      Login
+                                    </Link>
+                                  </div>
+                                  <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
+                                    <Link 
+                                      href="/modules/auth/TraderSignUp" 
+                                      className="font-semibold text-gray-900" 
+                                      onClick={close}
+                                    >
+                                      Become a Trader
+                                    </Link>
+                                  </div>
+                                </>
+                              )}
                             </div>
                           </div>
                         </Popover.Panel>
