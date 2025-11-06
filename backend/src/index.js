@@ -3,7 +3,8 @@ import dotenv from 'dotenv'
 import userRoutes from './routes/userRoutes.js'
 import traderRoutes from './routes/traderRoutes.js'
 import categoryRoutes from './routes/categoryRoutes.js'
-import cookieParser from 'cookie-parser';
+import adminRoutes from './routes/adminRoutes.js'
+import cookieParser from 'cookie-parser'
 import cors from 'cors';
 
 dotenv.config();
@@ -23,6 +24,7 @@ app.use(express.json());
 app.use('/api/user',userRoutes);
 app.use('/api/trader',traderRoutes);
 app.use('/api/category',categoryRoutes);
+app.use('/api/admin',adminRoutes);
 
 app.listen(PORT, () => {
     console.log(`Listening...`);
