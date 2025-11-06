@@ -184,7 +184,7 @@ export default function Navigation() {
   // Logout
   const handleLogout = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/auth/logout`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/logout`, {
         method: 'POST',
         credentials: 'include',
       });
