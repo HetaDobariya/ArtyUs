@@ -1,5 +1,5 @@
 import express from 'express'
-import { getAllUsers, getAllTraders } from "../controller/admincontroller.js";
+import { getAllUsers} from "../controller/admincontroller.js";
 import { verifyToken } from '../middleware/verifytoken.js';
 
 const router = express.Router();
