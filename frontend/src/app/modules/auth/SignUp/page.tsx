@@ -37,6 +37,7 @@ export default function SignUp() {
                     contact: contactNumber,
                     password,
                 }),
+                credentials: 'include'
             });
 
             const data = await res.json();

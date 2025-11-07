@@ -177,7 +177,7 @@ function classNames(...classes: string[]) {
 
 export default function Navigation() {
   const [open, setOpen] = useState(false);
-  
+
   // Use the context instead of local state
   const { user, setUser, loading } = useUser();
 
@@ -447,8 +447,8 @@ export default function Navigation() {
                           >
                             <Popover.Panel className="absolute inset-x-0 top-16 text-sm text-gray-500 z-50">
                               {/* Click outside area - this will close the menu when clicked */}
-                              <div 
-                                className="fixed inset-0 top-16" 
+                              <div
+                                className="fixed inset-0 top-16"
                                 onClick={close}
                               />
                               <div className="absolute inset-0 top-1/2 bg-white shadow" />
@@ -545,23 +545,23 @@ export default function Navigation() {
                       >
                         <Popover.Panel className="absolute right-0 z-10 mt-5 flex w-60 max-w-max px-4">
                           {/* Click outside area */}
-                          <div 
-                            className="fixed inset-0" 
+                          <div
+                            className="fixed inset-0"
                             onClick={close}
                           />
                           <div className="w-screen max-w-md flex-auto overflow-hidden rounded-3xl bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5 relative">
                             <div className="p-4">
                               {/* User info in dropdown */}
-                             
-                              
+
+
                               {user ? (
                                 <>
                                   {/* Trader specific menu items */}
                                   {user.role === 'trader' && (
                                     <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
-                                      <Link 
-                                        href="/trader/profile" 
-                                        className="font-semibold text-gray-900 flex items-center gap-2" 
+                                      <Link
+                                        href="/profile/trader"
+                                        className="font-semibold text-gray-900 flex items-center gap-2"
                                         onClick={close}
                                       >
                                         <BusinessIcon className="h-4 w-4" />
@@ -569,19 +569,19 @@ export default function Navigation() {
                                       </Link>
                                     </div>
                                   )}
-                                  
+
                                   {/* Common menu items for all users */}
                                   <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
-                                    <Link 
-                                      href="/profile" 
-                                      className="font-semibold text-gray-900 flex items-center gap-2" 
+                                    <Link
+                                      href="/profile/user"
+                                      className="font-semibold text-gray-900 flex items-center gap-2"
                                       onClick={close}
                                     >
                                       <PersonOutlineIcon className="h-4 w-4" />
                                       My Profile
                                     </Link>
                                   </div>
-                                  
+
                                   {/* Logout */}
                                   <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
                                     <button
@@ -602,18 +602,18 @@ export default function Navigation() {
                                 /* Show login options when user is not logged in */
                                 <>
                                   <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
-                                    <Link 
-                                      href="/modules/auth/SignIn" 
-                                      className="font-semibold text-gray-900" 
+                                    <Link
+                                      href="/modules/auth/SignIn"
+                                      className="font-semibold text-gray-900"
                                       onClick={close}
                                     >
                                       Login
                                     </Link>
                                   </div>
                                   <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
-                                    <Link 
-                                      href="/modules/auth/TraderSignUp" 
-                                      className="font-semibold text-gray-900" 
+                                    <Link
+                                      href="/modules/auth/TraderSignUp"
+                                      className="font-semibold text-gray-900"
                                       onClick={close}
                                     >
                                       Become a Trader
