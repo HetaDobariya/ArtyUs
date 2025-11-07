@@ -56,6 +56,7 @@ interface Product {
   id: string;
   name: string;
   category: string;
+  childCategory?: string;
   price: number;
   quantity: number;
   description: string;
@@ -68,6 +69,7 @@ const TraderDashboard: React.FC = () => {
       id: '1',
       name: 'Week Planner',
       category: 'weekly planner',
+      childCategory: 'Paper Planner',
       price: 500,
       quantity: 5,
       description: 'Plan your week with our simple and efficient black and white themed planner.',
@@ -77,6 +79,7 @@ const TraderDashboard: React.FC = () => {
       id: '2',
       name: 'Magnetic Week Planner',
       category: 'weekly planner',
+      childCategory: 'Magnetic Planner',
       price: 1850,
       quantity: 8,
       description: 'Transparent magnetic week planner to keep track of all your todos and reminders.',
@@ -86,6 +89,7 @@ const TraderDashboard: React.FC = () => {
       id: '3',
       name: 'Pastel Exam Board',
       category: 'exam boards',
+      childCategory: 'Pastel Board',
       price: 210,
       quantity: 10,
       description: 'Adorable clipboards, featuring lovely illustrations in soft pastel colors. A perfect and playful accessory for school, home, or office use.',
@@ -95,6 +99,7 @@ const TraderDashboard: React.FC = () => {
       id: '4',
       name: 'Pastel Exam Boards',
       category: 'exam boards',
+      childCategory: 'Clip Board',
       price: 120,
       quantity: 15,
       description: 'Adorable clipboards in soft pastel colors. A perfect and playful accessory for school, home, or office use.',
@@ -110,6 +115,7 @@ const TraderDashboard: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     category: '',
+    childCategory: '',
     price: '',
     quantity: '',
     description: '',
@@ -117,6 +123,14 @@ const TraderDashboard: React.FC = () => {
   });
 
   const categories = ['weekly planner', 'exam boards', 'notebooks', 'art supplies', 'crafts'];
+
+  const childCategories: Record<string, string[]> = {
+    "weekly planner": ["Acrylic Planner", "Magnetic Planner", "Paper Planner"],
+    "exam boards": ["Clip Board", "Pastel Board", "Custom Printed Board"],
+    "notebooks": ["Plain", "Ruled", "Dotted", "Custom Cover"],
+    "art supplies": ["Brushes", "Canvas", "Paints", "Markers"],
+    "crafts": ["Stickers", "Washi Tape", "Scrapbook Materials"],
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -172,6 +186,7 @@ const TraderDashboard: React.FC = () => {
     setFormData({
       name: '',
       category: '',
+      childCategory: '',
       price: '',
       quantity: '',
       description: '',
@@ -195,6 +210,7 @@ const TraderDashboard: React.FC = () => {
       id: Date.now().toString(),
       name: formData.name,
       category: formData.category,
+      childCategory: formData.childCategory || undefined,
       price: parseFloat(formData.price),
       quantity: parseInt(formData.quantity),
       description: formData.description,
@@ -221,6 +237,7 @@ const TraderDashboard: React.FC = () => {
       ...selectedProduct,
       name: formData.name,
       category: formData.category,
+      childCategory: formData.childCategory || undefined,
       price: parseFloat(formData.price),
       quantity: parseInt(formData.quantity),
       description: formData.description,
@@ -244,6 +261,7 @@ const TraderDashboard: React.FC = () => {
     setFormData({
       name: product.name,
       category: product.category,
+      childCategory: product.childCategory || "",
       price: product.price.toString(),
       quantity: product.quantity.toString(),
       description: product.description,
@@ -259,24 +277,24 @@ const TraderDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-[#FBE8F0] via-[#E8FFF4] to-[#EEF2FF]">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-40">
+      <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-40 border-b border-[#F3E9FF]">
         <div className="container mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-[#C9B6FF] to-[#FFD6E8] bg-clip-text text-transparent" style={{ WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               Trader Dashboard
             </h1>
             <div className="flex items-center gap-3">
               <Link href="/productlist">
-                <button className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                <button className="flex items-center gap-2 bg-gradient-to-r from-[#A8E6CF] to-[#C8F0FF] text-[#0f172a] px-5 py-2.5 rounded-lg hover:from-[#96e0bf] hover:to-[#bfeeff] transition-all duration-300 transform hover:scale-105 shadow-sm">
                   <Package size={20} />
                   PRODUCT LIST
                 </button>
               </Link>
               <button
                 onClick={openAddModal}
-                className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                className="flex items-center gap-2 bg-gradient-to-r from-[#FFD1DC] to-[#F8E1FF] text-[#0f172a] px-5 py-2.5 rounded-lg hover:from-[#ffc3cf] hover:to-[#f2d4ff] transition-all duration-300 transform hover:scale-105 shadow-sm"
               >
                 <PlusCircle size={20} />
                 ADD PRODUCT
@@ -292,7 +310,7 @@ const TraderDashboard: React.FC = () => {
           {products.map((product, index) => (
             <div
               key={product.id}
-              className="bg-white rounded-2xl shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl"
+              className="bg-white rounded-2xl shadow-sm overflow-hidden transform transition-all duration-300 hover:scale-[1.02] hover:shadow-md border border-transparent hover:border-[#F3E9FF]"
               style={{
                 animation: `fadeInUp 0.5s ease-out ${index * 0.1}s both`
               }}
@@ -303,28 +321,29 @@ const TraderDashboard: React.FC = () => {
                   <img
                     src={product.imageUrl}
                     alt={product.name}
-                    className="w-full h-64 md:h-full object-cover rounded-xl shadow-md"
+                    className="w-full h-64 md:h-full object-cover rounded-xl shadow-sm"
                   />
                 </div>
 
                 {/* Product Details */}
                 <div className="flex-1 flex flex-col justify-between">
                   <div>
-                    <h2 className="text-xl font-bold text-gray-800 mb-2">
-                      Product Name: <span className="text-gray-700">{product.name}</span>
+                    <h2 className="text-xl font-bold text-[#1f2937] mb-2">
+                      Product Name: <span className="text-[#374151]">{product.name}</span>
                     </h2>
                     <div className="flex gap-4 mb-3">
-                      <p className="text-gray-600">
+                      <p className="text-[#4b5563]">
                         <span className="font-semibold">Qty:</span> {product.quantity}
                       </p>
-                      <p className="text-gray-600">
+                      <p className="text-[#4b5563]">
                         <span className="font-semibold">Price:</span> {product.price.toFixed(2)}
                       </p>
                     </div>
-                    <p className="text-gray-600 mb-3">
+                    <p className="text-[#4b5563] mb-3">
                       <span className="font-semibold">Category:</span> {product.category}
+                      {product.childCategory ? <span className="ml-2 text-sm text-[#6b7280]">/ {product.childCategory}</span> : null}
                     </p>
-                    <p className="text-gray-600 text-sm leading-relaxed">
+                    <p className="text-[#4b5563] text-sm leading-relaxed">
                       <span className="font-semibold">Desc:</span> {product.description}
                     </p>
                   </div>
@@ -333,14 +352,14 @@ const TraderDashboard: React.FC = () => {
                   <div className="flex gap-3 mt-4">
                     <button
                       onClick={() => openEditModal(product)}
-                      className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 transform hover:scale-105 shadow-md"
+                      className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-[#DDEBFF] to-[#EAF7FF] text-[#0f172a] px-4 py-2 rounded-lg hover:from-[#cfe0ff] hover:to-[#dff6ff] transition-all duration-300 transform hover:scale-105 shadow-sm"
                     >
                       <Edit size={18} />
                       EDIT
                     </button>
                     <button
                       onClick={() => handleDeleteProduct(product.id)}
-                      className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-lg hover:from-red-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 shadow-md"
+                      className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-[#FFE6E6] to-[#FFF5E6] text-[#0f172a] px-4 py-2 rounded-lg hover:from-[#ffd5d5] hover:to-[#fff0da] transition-all duration-300 transform hover:scale-105 shadow-sm"
                     >
                       <Trash2 size={18} />
                       DELETE
@@ -355,17 +374,17 @@ const TraderDashboard: React.FC = () => {
 
       {/* Add Product Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-100">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-100 border border-[#F3E9FF]">
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">Add Product</h2>
+                <h2 className="text-2xl font-bold text-[#1f2937]">Add Product</h2>
                 <button
                   onClick={() => {
                     setShowAddModal(false);
                     resetForm();
                   }}
-                  className="text-gray-500 hover:text-gray-700 transition-colors"
+                  className="text-[#6b7280] hover:text-[#374151] transition-colors"
                 >
                   <X size={24} />
                 </button>
@@ -374,10 +393,10 @@ const TraderDashboard: React.FC = () => {
               <div className="space-y-4">
                 {/* Image Upload */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#374151] mb-2">
                     Product Image
                   </label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-purple-500 transition-colors cursor-pointer">
+                  <div className="border-2 border-dashed border-[#E8F6F1] rounded-lg p-4 text-center hover:border-[#C9B6FF] transition-colors cursor-pointer">
                     <input
                       type="file"
                       accept="image/*"
@@ -390,8 +409,8 @@ const TraderDashboard: React.FC = () => {
                         <img src={imagePreview} alt="Preview" className="w-full h-48 object-cover rounded-lg mb-2" />
                       ) : (
                         <div className="flex flex-col items-center">
-                          <Upload className="text-gray-400 mb-2" size={40} />
-                          <p className="text-gray-600 text-sm">Click to upload image</p>
+                          <Upload className="text-[#9CA3AF] mb-2" size={40} />
+                          <p className="text-[#6b7280] text-sm">Click to upload image</p>
                         </div>
                       )}
                     </label>
@@ -402,7 +421,7 @@ const TraderDashboard: React.FC = () => {
                   name="category"
                   value={formData.category}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                  className="w-full px-4 py-3 border border-[#E9EEF6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9B6FF] transition-all"
                 >
                   <option value="">Select Category</option>
                   {categories.map(cat => (
@@ -410,13 +429,29 @@ const TraderDashboard: React.FC = () => {
                   ))}
                 </select>
 
+                {formData.category && (
+                  <select
+                    name="childCategory"
+                    value={formData.childCategory || ""}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-[#E9EEF6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9B6FF] transition-all mt-3"
+                  >
+                    <option value="">Select Subcategory</option>
+                    {childCategories[formData.category]?.map((sub) => (
+                      <option key={sub} value={sub}>
+                        {sub}
+                      </option>
+                    ))}
+                  </select>
+                )}
+
                 <input
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="Product name"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                  className="w-full px-4 py-3 border border-[#E9EEF6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9B6FF] transition-all"
                 />
 
                 <input
@@ -425,7 +460,7 @@ const TraderDashboard: React.FC = () => {
                   value={formData.price}
                   onChange={handleInputChange}
                   placeholder="Price"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                  className="w-full px-4 py-3 border border-[#E9EEF6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9B6FF] transition-all"
                 />
 
                 <input
@@ -434,7 +469,7 @@ const TraderDashboard: React.FC = () => {
                   value={formData.quantity}
                   onChange={handleInputChange}
                   placeholder="Quantity"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                  className="w-full px-4 py-3 border border-[#E9EEF6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9B6FF] transition-all"
                 />
 
                 <textarea
@@ -443,7 +478,7 @@ const TraderDashboard: React.FC = () => {
                   onChange={handleInputChange}
                   placeholder="Description"
                   rows={3}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all resize-none"
+                  className="w-full px-4 py-3 border border-[#E9EEF6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9B6FF] transition-all resize-none"
                 />
 
                 <div className="flex gap-3 pt-4">
@@ -452,13 +487,13 @@ const TraderDashboard: React.FC = () => {
                       setShowAddModal(false);
                       resetForm();
                     }}
-                    className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-300"
+                    className="flex-1 px-6 py-3 border-2 border-[#E9EEF6] text-[#374151] rounded-lg hover:bg-[#FAFBFF] transition-all duration-300"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleAddProduct}
-                    className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                    className="flex-1 px-6 py-3 bg-gradient-to-r from-[#FFD1DC] to-[#F8E1FF] text-[#0f172a] rounded-lg hover:from-[#ffc3cf] hover:to-[#f2d4ff] transition-all duration-300 transform hover:scale-105 shadow-sm"
                   >
                     ADD
                   </button>
@@ -471,18 +506,18 @@ const TraderDashboard: React.FC = () => {
 
       {/* Edit Product Modal */}
       {showEditModal && selectedProduct && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-100">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-100 border border-[#F3E9FF]">
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">Edit Product</h2>
+                <h2 className="text-2xl font-bold text-[#1f2937]">Edit Product</h2>
                 <button
                   onClick={() => {
                     setShowEditModal(false);
                     setSelectedProduct(null);
                     resetForm();
                   }}
-                  className="text-gray-500 hover:text-gray-700 transition-colors"
+                  className="text-[#6b7280] hover:text-[#374151] transition-colors"
                 >
                   <X size={24} />
                 </button>
@@ -491,10 +526,10 @@ const TraderDashboard: React.FC = () => {
               <div className="space-y-4">
                 {/* Image Upload */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#374151] mb-2">
                     Change Product Image
                   </label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-purple-500 transition-colors cursor-pointer">
+                  <div className="border-2 border-dashed border-[#E8F6F1] rounded-lg p-4 text-center hover:border-[#C9B6FF] transition-colors cursor-pointer">
                     <input
                       type="file"
                       accept="image/*"
@@ -507,55 +542,84 @@ const TraderDashboard: React.FC = () => {
                         <img src={imagePreview} alt="Preview" className="w-full h-48 object-cover rounded-lg mb-2" />
                       ) : (
                         <div className="flex flex-col items-center">
-                          <Upload className="text-gray-400 mb-2" size={40} />
-                          <p className="text-gray-600 text-sm">Click to change image</p>
+                          <Upload className="text-[#9CA3AF] mb-2" size={40} />
+                          <p className="text-[#6b7280] text-sm">Click to change image</p>
                         </div>
                       )}
                     </label>
                   </div>
                 </div>
 
+                {/* Category + Subcategory (Edit) */}
+                <select
+                  name="category"
+                  value={formData.category}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-[#E9EEF6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9B6FF] transition-all"
+                >
+                  <option value="">Select Category</option>
+                  {categories.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+
+                {formData.category && (
+                  <select
+                    name="childCategory"
+                    value={formData.childCategory || ""}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-[#E9EEF6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9B6FF] transition-all mt-3"
+                  >
+                    <option value="">Select Subcategory</option>
+                    {childCategories[formData.category]?.map((sub) => (
+                      <option key={sub} value={sub}>
+                        {sub}
+                      </option>
+                    ))}
+                  </select>
+                )}
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
+                  <label className="block text-sm font-medium text-[#374151] mb-2">Product Name</label>
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                    className="w-full px-4 py-3 border border-[#E9EEF6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9B6FF] transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">QTY</label>
+                  <label className="block text-sm font-medium text-[#374151] mb-2">QTY</label>
                   <input
                     type="number"
                     name="quantity"
                     value={formData.quantity}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                    className="w-full px-4 py-3 border border-[#E9EEF6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9B6FF] transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Price</label>
+                  <label className="block text-sm font-medium text-[#374151] mb-2">Price</label>
                   <input
                     type="number"
                     name="price"
                     value={formData.price}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                    className="w-full px-4 py-3 border border-[#E9EEF6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9B6FF] transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                  <label className="block text-sm font-medium text-[#374151] mb-2">Description</label>
                   <textarea
                     name="description"
                     value={formData.description}
                     onChange={handleInputChange}
                     rows={3}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all resize-none"
+                    className="w-full px-4 py-3 border border-[#E9EEF6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9B6FF] transition-all resize-none"
                   />
                 </div>
 
@@ -566,13 +630,13 @@ const TraderDashboard: React.FC = () => {
                       setSelectedProduct(null);
                       resetForm();
                     }}
-                    className="flex-1 px-6 py-3 border-2 border-blue-500 text-blue-600 rounded-lg hover:bg-blue-50 transition-all duration-300"
+                    className="flex-1 px-6 py-3 border-2 border-[#D6EAFE] text-[#0f172a] rounded-lg hover:bg-[#F8FBFF] transition-all duration-300"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleEditProduct}
-                    className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                    className="flex-1 px-6 py-3 bg-gradient-to-r from-[#FFD1DC] to-[#F8E1FF] text-[#0f172a] rounded-lg hover:from-[#ffc3cf] hover:to-[#f2d4ff] transition-all duration-300 transform hover:scale-105 shadow-sm"
                   >
                     UPDATE
                   </button>

@@ -226,13 +226,14 @@ const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+    <div
+      className="min-h-screen"
+      style={{ background: 'linear-gradient(135deg,#FBE8F0 0%,#E8FFF4 50%,#EEF2FF 100%)' }}
+    >
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-40">
+      <header className="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-40" style={{ borderBottom: '1px solid #F3E9FF' }}>
         <div className="container mx-auto px-6 py-4">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Admin Dashboard
-          </h1>
+         <h1 className="text-3xl font-bold text-black"> Admin Dashboard </h1>
         </div>
       </header>
 
@@ -240,41 +241,44 @@ const AdminDashboard: React.FC = () => {
         {/* Stats Overview */}
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white rounded-2xl shadow-lg p-6 transform transition-all hover:scale-105">
+            <div className="bg-white rounded-2xl shadow-lg p-6 transform transition-all hover:scale-105"
+                 style={{ border: '1px solid transparent', boxShadow: '0 6px 18px rgba(20,20,30,0.04)' }}>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-600 text-sm font-medium">Total Users</p>
-                  <p className="text-3xl font-bold text-purple-600">{stats.totalUsers}</p>
-                  <p className="text-sm text-gray-500 mt-1">{stats.activeUsers} active</p>
+                  <p className="text-[#4b5563] text-sm font-medium">Total Users</p>
+                  <p className="text-3xl font-bold" style={{ color: '#1f2937' }}>{stats.totalUsers}</p>
+                  <p className="text-sm" style={{ color: '#4b5563', marginTop: 4 }}>{stats.activeUsers} active</p>
                 </div>
-                <div className="bg-purple-100 p-4 rounded-full">
-                  <Users className="text-purple-600" size={32} />
+                <div className="p-4 rounded-full" style={{ background: '#EAF6ED' }}>
+                  <Users className="text-[#8BBF9F]" size={32} />
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-lg p-6 transform transition-all hover:scale-105">
+            <div className="bg-white rounded-2xl shadow-lg p-6 transform transition-all hover:scale-105"
+                 style={{ border: '1px solid transparent', boxShadow: '0 6px 18px rgba(20,20,30,0.04)' }}>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-600 text-sm font-medium">Total Traders</p>
-                  <p className="text-3xl font-bold text-blue-600">{stats.totalTraders}</p>
-                  <p className="text-sm text-gray-500 mt-1">{stats.verifiedTraders} verified</p>
+                  <p className="text-[#4b5563] text-sm font-medium">Total Traders</p>
+                  <p className="text-3xl font-bold" style={{ color: '#1f2937' }}>{stats.totalTraders}</p>
+                  <p className="text-sm" style={{ color: '#4b5563', marginTop: 4 }}>{stats.verifiedTraders} verified</p>
                 </div>
-                <div className="bg-blue-100 p-4 rounded-full">
-                  <Store className="text-blue-600" size={32} />
+                <div className="p-4 rounded-full" style={{ background: '#E8F6F1' }}>
+                  <Store className="text-[#6E9BBF]" size={32} />
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-lg p-6 transform transition-all hover:scale-105">
+            <div className="bg-white rounded-2xl shadow-lg p-6 transform transition-all hover:scale-105"
+                 style={{ border: '1px solid transparent', boxShadow: '0 6px 18px rgba(20,20,30,0.04)' }}>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-600 text-sm font-medium">Total Products</p>
-                  <p className="text-3xl font-bold text-green-600">{stats.totalProducts}</p>
-                  <p className="text-sm text-gray-500 mt-1">{stats.totalCategories} categories</p>
+                  <p className="text-[#4b5563] text-sm font-medium">Total Products</p>
+                  <p className="text-3xl font-bold" style={{ color: '#1f2937' }}>{stats.totalProducts}</p>
+                  <p className="text-sm" style={{ color: '#4b5563', marginTop: 4 }}>{stats.totalCategories} categories</p>
                 </div>
-                <div className="bg-green-100 p-4 rounded-full">
-                  <Package className="text-green-600" size={32} />
+                <div className="p-4 rounded-full" style={{ background: '#FFF5F8' }}>
+                  <Package className="text-[#A8E6CF]" size={32} />
                 </div>
               </div>
             </div>
@@ -282,17 +286,18 @@ const AdminDashboard: React.FC = () => {
         )}
 
         {/* Tabs */}
-        <div className="bg-white rounded-2xl shadow-lg p-2 mb-6">
+        <div className="bg-white rounded-2xl shadow-lg p-2 mb-6" style={{ border: '1px solid #F3E9FF' }}>
           <div className="flex flex-wrap gap-2">
             {['overview', 'users', 'traders', 'products', 'categories'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab as any)}
-                className={`flex-1 min-w-[120px] px-6 py-3 rounded-lg font-medium transition-all ${
+                className="flex-1 min-w-[120px] px-6 py-3 rounded-lg font-medium transition-all"
+                style={
                   activeTab === tab
-                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
+                    ? { background: 'linear-gradient(90deg,#FFD1DC,#F8E1FF)', color: '#0f172a' }
+                    : { color: '#374151', background: 'transparent' }
+                }
               >
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
               </button>
@@ -302,22 +307,30 @@ const AdminDashboard: React.FC = () => {
 
         {/* Search Bar */}
         {activeTab !== 'overview' && (
-          <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+          <div className="bg-white rounded-2xl shadow-lg p-6 mb-6" style={{ border: '1px solid #F3E9FF' }}>
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
               <div className="relative flex-1 w-full">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2" size={20} />
                 <input
                   type="text"
                   placeholder={`Search ${activeTab}...`}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full pl-12 pr-4 py-3 rounded-lg transition-all"
+                  style={{
+                    border: '1px solid #E9EEF6',
+                    outline: 'none',
+                    color: '#0f172a'
+                  }}
+                  onFocus={(e) => (e.currentTarget.style.boxShadow = '0 0 0 6px rgba(201,182,255,0.12)')}
+                  onBlur={(e) => (e.currentTarget.style.boxShadow = 'none')}
                 />
               </div>
               {activeTab === 'categories' && (
                 <button
                   onClick={() => setShowCategoryModal(true)}
-                  className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all"
+                  className="flex items-center gap-2 px-6 py-3 rounded-lg transition-all"
+                  style={{ background: 'linear-gradient(90deg,#A8E6CF,#C8F0FF)', color: '#0f172a', boxShadow: '0 6px 18px rgba(20,20,30,0.04)' }}
                 >
                   <Plus size={20} />
                   Add Category
@@ -329,10 +342,10 @@ const AdminDashboard: React.FC = () => {
 
         {/* Users Tab */}
         {activeTab === 'users' && (
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden" style={{ border: '1px solid #F3E9FF' }}>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+                <thead style={{ background: 'linear-gradient(90deg,#C9B6FF,#FFD6E8)', color: '#fff' }}>
                   <tr>
                     <th className="px-6 py-4 text-left">Name</th>
                     <th className="px-6 py-4 text-left">Email</th>
@@ -343,14 +356,18 @@ const AdminDashboard: React.FC = () => {
                 </thead>
                 <tbody>
                   {filteredUsers.map((user) => (
-                    <tr key={user.id} className="border-b hover:bg-gray-50">
-                      <td className="px-6 py-4 font-medium">{user.name}</td>
-                      <td className="px-6 py-4 text-gray-600">{user.email}</td>
-                      <td className="px-6 py-4 text-gray-600">{user.joinedDate}</td>
+                    <tr key={user.id} className="border-b hover:bg-white/60">
+                      <td className="px-6 py-4 font-medium" style={{ color: '#1f2937' }}>{user.name}</td>
+                      <td className="px-6 py-4" style={{ color: '#4b5563' }}>{user.email}</td>
+                      <td className="px-6 py-4" style={{ color: '#4b5563' }}>{user.joinedDate}</td>
                       <td className="px-6 py-4">
-                        <span className={`px-3 py-1 rounded-full text-sm ${
-                          user.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
-                        }`}>
+                        <span style={{
+                          padding: '6px 12px',
+                          borderRadius: 999,
+                          fontSize: 12,
+                          background: user.status === 'active' ? '#EAF6ED' : '#F3F4F6',
+                          color: user.status === 'active' ? '#1f7a3a' : '#6b7280'
+                        }}>
                           {user.status}
                         </span>
                       </td>
@@ -358,13 +375,15 @@ const AdminDashboard: React.FC = () => {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => viewDetails(user)}
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                            className="p-2 rounded-lg transition-all"
+                            style={{ color: '#6E9BBF', background: 'transparent' }}
                           >
                             <Eye size={18} />
                           </button>
                           <button
                             onClick={() => handleDeleteUser(user.id)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                            className="p-2 rounded-lg transition-all"
+                            style={{ color: '#ff6b6b', background: 'transparent' }}
                           >
                             <Trash2 size={18} />
                           </button>
@@ -380,10 +399,10 @@ const AdminDashboard: React.FC = () => {
 
         {/* Traders Tab */}
         {activeTab === 'traders' && (
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden" style={{ border: '1px solid #F3E9FF' }}>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+                <thead style={{ background: 'linear-gradient(90deg,#C9B6FF,#FFD6E8)', color: '#fff' }}>
                   <tr>
                     <th className="px-6 py-4 text-left">Name</th>
                     <th className="px-6 py-4 text-left">Email</th>
@@ -394,17 +413,17 @@ const AdminDashboard: React.FC = () => {
                 </thead>
                 <tbody>
                   {filteredTraders.map((trader) => (
-                    <tr key={trader.id} className="border-b hover:bg-gray-50">
-                      <td className="px-6 py-4 font-medium">{trader.name}</td>
-                      <td className="px-6 py-4 text-gray-600">{trader.email}</td>
-                      <td className="px-6 py-4 text-gray-600">{trader.joinedDate}</td>
+                    <tr key={trader.id} className="border-b hover:bg-white/60">
+                      <td className="px-6 py-4 font-medium" style={{ color: '#1f2937' }}>{trader.name}</td>
+                      <td className="px-6 py-4" style={{ color: '#4b5563' }}>{trader.email}</td>
+                      <td className="px-6 py-4" style={{ color: '#4b5563' }}>{trader.joinedDate}</td>
                       <td className="px-6 py-4">
                         {trader.verified ? (
-                          <span className="flex items-center gap-1 text-green-600">
+                          <span className="flex items-center gap-1" style={{ color: '#8BBF9F' }}>
                             <CheckCircle size={18} /> Verified
                           </span>
                         ) : (
-                          <span className="flex items-center gap-1 text-yellow-600">
+                          <span className="flex items-center gap-1" style={{ color: '#F59E0B' }}>
                             <XCircle size={18} /> Pending
                           </span>
                         )}
@@ -413,21 +432,24 @@ const AdminDashboard: React.FC = () => {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => viewDetails(trader)}
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                            className="p-2 rounded-lg transition-all"
+                            style={{ color: '#6E9BBF' }}
                           >
                             <Eye size={18} />
                           </button>
                           {!trader.verified && (
                             <button
                               onClick={() => handleVerifyTrader(trader.id)}
-                              className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-all"
+                              className="p-2 rounded-lg transition-all"
+                              style={{ color: '#8BBF9F' }}
                             >
                               <CheckCircle size={18} />
                             </button>
                           )}
                           <button
                             onClick={() => handleDeleteTrader(trader.id)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                            className="p-2 rounded-lg transition-all"
+                            style={{ color: '#ff6b6b' }}
                           >
                             <Trash2 size={18} />
                           </button>
@@ -443,10 +465,10 @@ const AdminDashboard: React.FC = () => {
 
         {/* Products Tab */}
         {activeTab === 'products' && (
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden" style={{ border: '1px solid #F3E9FF' }}>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+                <thead style={{ background: 'linear-gradient(90deg,#C9B6FF,#FFD6E8)', color: '#fff' }}>
                   <tr>
                     <th className="px-6 py-4 text-left">Product</th>
                     <th className="px-6 py-4 text-left">Category</th>
@@ -458,23 +480,25 @@ const AdminDashboard: React.FC = () => {
                 </thead>
                 <tbody>
                   {filteredProducts.map((product) => (
-                    <tr key={product.id} className="border-b hover:bg-gray-50">
-                      <td className="px-6 py-4 font-medium">{product.name}</td>
-                      <td className="px-6 py-4 text-gray-600">{product.category}</td>
-                      <td className="px-6 py-4 text-gray-600">₹{product.price}</td>
-                      <td className="px-6 py-4 text-gray-600">{product.traderName}</td>
-                      <td className="px-6 py-4 text-gray-600">{product.addedDate}</td>
+                    <tr key={product.id} className="border-b hover:bg-white/60">
+                      <td className="px-6 py-4 font-medium" style={{ color: '#1f2937' }}>{product.name}</td>
+                      <td className="px-6 py-4" style={{ color: '#4b5563' }}>{product.category}</td>
+                      <td className="px-6 py-4" style={{ color: '#4b5563' }}>₹{product.price}</td>
+                      <td className="px-6 py-4" style={{ color: '#4b5563' }}>{product.traderName}</td>
+                      <td className="px-6 py-4" style={{ color: '#4b5563' }}>{product.addedDate}</td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => viewDetails(product)}
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                            className="p-2 rounded-lg transition-all"
+                            style={{ color: '#6E9BBF' }}
                           >
                             <Eye size={18} />
                           </button>
                           <button
                             onClick={() => handleDeleteProduct(product.id)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                            className="p-2 rounded-lg transition-all"
+                            style={{ color: '#ff6b6b' }}
                           >
                             <Trash2 size={18} />
                           </button>
@@ -492,21 +516,22 @@ const AdminDashboard: React.FC = () => {
         {activeTab === 'categories' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {categories.map((category) => (
-              <div key={category.id} className="bg-white rounded-2xl shadow-lg p-6 transform transition-all hover:scale-105">
+              <div key={category.id} className="bg-white rounded-2xl shadow-lg p-6 transform transition-all hover:scale-105" style={{ border: '1px solid #F3E9FF' }}>
                 <div className="flex items-start justify-between mb-4">
-                  <div className="bg-purple-100 p-3 rounded-full">
-                    <Tag className="text-purple-600" size={24} />
+                  <div className="p-3 rounded-full" style={{ background: '#EAF6ED' }}>
+                    <Tag className="text-[#8BBF9F]" size={24} />
                   </div>
                   <button
                     onClick={() => handleDeleteCategory(category.id)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                    className="p-2 rounded-lg transition-all"
+                    style={{ color: '#ff6b6b' }}
                   >
                     <Trash2 size={18} />
                   </button>
                 </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">{category.name}</h3>
-                <p className="text-gray-600 text-sm mb-2">Slug: <span className="font-mono bg-gray-100 px-2 py-1 rounded">{category.slug}</span></p>
-                <p className="text-gray-500 text-sm">{category.productCount} products</p>
+                <h3 className="text-xl font-bold mb-2" style={{ color: '#1f2937' }}>{category.name}</h3>
+                <p className="text-sm mb-2" style={{ color: '#4b5563' }}>Slug: <span className="font-mono" style={{ background: '#F8FAFB', padding: '4px 8px', borderRadius: 6 }}>{category.slug}</span></p>
+                <p className="text-sm" style={{ color: '#6b7280' }}>{category.productCount} products</p>
               </div>
             ))}
           </div>
@@ -515,14 +540,14 @@ const AdminDashboard: React.FC = () => {
 
       {/* Add Category Modal */}
       {showCategoryModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md" style={{ border: '1px solid #F3E9FF' }}>
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">Add Category</h2>
+                <h2 className="text-2xl font-bold" style={{ color: '#1f2937' }}>Add Category</h2>
                 <button
                   onClick={() => setShowCategoryModal(false)}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-[#6b7280] hover:text-[#374151]"
                 >
                   <X size={24} />
                 </button>
@@ -530,38 +555,46 @@ const AdminDashboard: React.FC = () => {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Category Name</label>
+                  <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>Category Name</label>
                   <input
                     type="text"
                     value={categoryForm.name}
                     onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
                     placeholder="e.g., Art Supplies"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-4 py-3 rounded-lg transition-all"
+                    style={{ border: '1px solid #E9EEF6', outline: 'none', color: '#0f172a' }}
+                    onFocus={(e) => (e.currentTarget.style.boxShadow = '0 0 0 6px rgba(201,182,255,0.12)')}
+                    onBlur={(e) => (e.currentTarget.style.boxShadow = 'none')}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Slug</label>
+                  <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>Slug</label>
                   <input
                     type="text"
                     value={categoryForm.slug}
                     onChange={(e) => setCategoryForm({ ...categoryForm, slug: e.target.value })}
                     placeholder="e.g., art-supplies"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-4 py-3 rounded-lg transition-all"
+                    style={{ border: '1px solid #E9EEF6', outline: 'none', color: '#0f172a' }}
+                    onFocus={(e) => (e.currentTarget.style.boxShadow = '0 0 0 6px rgba(201,182,255,0.12)')}
+                    onBlur={(e) => (e.currentTarget.style.boxShadow = 'none')}
                   />
-                  <p className="text-xs text-gray-500 mt-1">Use lowercase with hyphens</p>
+                  <p className="text-xs mt-1" style={{ color: '#6b7280' }}>Use lowercase with hyphens</p>
                 </div>
 
                 <div className="flex gap-3 pt-4">
                   <button
                     onClick={() => setShowCategoryModal(false)}
-                    className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                    className="flex-1 px-6 py-3 rounded-lg transition-all"
+                    style={{ border: '2px solid #E9EEF6', color: '#374151', background: '#fff' }}
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleAddCategory}
-                    className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700"
+                    className="flex-1 px-6 py-3 rounded-lg transition-all"
+                    style={{ background: 'linear-gradient(90deg,#FFD1DC,#F8E1FF)', color: '#0f172a', boxShadow: '0 6px 18px rgba(20,20,30,0.04)' }}
                   >
                     Add
                   </button>
@@ -574,14 +607,14 @@ const AdminDashboard: React.FC = () => {
 
       {/* Details Modal */}
       {showDetailsModal && selectedEntity && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md" style={{ border: '1px solid #F3E9FF' }}>
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">Details</h2>
+                <h2 className="text-2xl font-bold" style={{ color: '#1f2937' }}>Details</h2>
                 <button
                   onClick={() => setShowDetailsModal(false)}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-[#6b7280] hover:text-[#374151]"
                 >
                   <X size={24} />
                 </button>
@@ -589,9 +622,9 @@ const AdminDashboard: React.FC = () => {
 
               <div className="space-y-3">
                 {Object.entries(selectedEntity).map(([key, value]) => (
-                  <div key={key} className="flex justify-between py-2 border-b">
-                    <span className="font-medium text-gray-700 capitalize">{key}:</span>
-                    <span className="text-gray-600">{String(value)}</span>
+                  <div key={key} className="flex justify-between py-2 border-b" style={{ borderColor: '#F3E9FF' }}>
+                    <span className="font-medium" style={{ color: '#374151', textTransform: 'capitalize' }}>{key}:</span>
+                    <span style={{ color: '#4b5563' }}>{String(value)}</span>
                   </div>
                 ))}
               </div>
@@ -599,6 +632,19 @@ const AdminDashboard: React.FC = () => {
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 };
