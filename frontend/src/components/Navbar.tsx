@@ -517,7 +517,7 @@ export default function Navigation() {
               <div className="ml-auto flex items-center">
                 {/* User greeting */}
                 {user && (
-                  <div className="hidden lg:flex items-center mr-4">
+                  <div className="hidden md:flex lg:flex items-center mr-4">
                     <span className="text-sm font-bold text-gray-700">
                       {getUserDisplayName()}
                     </span>
