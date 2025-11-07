@@ -1,4 +1,4 @@
-import { addProductModel, getAllProductsModel } from '../models/productmodel.js';
+import { addProductModel, getAllProductsModel, updateProductById, deleteProductById } from '../models/productmodel.js';
 
 export const addProduct = async (req, res) => {
   try {
@@ -49,5 +49,45 @@ export const getAllProducts = async (req, res) => {
   } catch (error) {
     console.error('Error fetching products:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const updateProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { qty, price, description } = req.body;
+
+    // Validate input
+    if (!qty || !price || !description) {
+      return res.status(400).json({ error: "qty, price, and description are required" });
+    }
+
+    const result = await updateProductById(id, { qty, price, description });
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Product not found or no changes made" });
+    }
+
+    res.status(200).json({ message: "Product updated successfully" });
+  } catch (error) {
+    console.error("Error updating product:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const deleteProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await deleteProductById(id);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    res.status(200).json({ message: "Product deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };

@@ -1,4 +1,4 @@
-import { userDetais, traderDetails, updateUserById, deleteUserById, updateTraderById, deleteTraderById, addslugsbyname  } from "../models/adminModel.js";
+import { userDetais, traderDetails, updateUserById, deleteUserById, updateTraderById, deleteTraderById, addslugsbyname} from "../models/adminModel.js";
 
 export const getAllUsers = async (req, res) => {
   try {
@@ -114,4 +114,9 @@ export const addSlugs = async (req,res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 }
+
+
+
+
+
 

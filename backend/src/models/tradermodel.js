@@ -29,3 +29,33 @@ export const updateTraderById = async (id, address, contact, description) => {
   const [result] = await pool.query(sql, [address, contact, description, id]);
   return result;
 };
+
+export const verifyTraderById = async (id) => {
+  const [result] = await pool.query(
+    `UPDATE user 
+     SET is_verified = 1 
+     WHERE id = ? AND is_trader = 1`,
+    [id]
+  );
+  return result;
+};
+
+export const getUnverifiedTraderList = async () => {
+  const [rows] = await pool.query(`
+    SELECT 
+      u.id AS user_id,
+      u.name AS user_name,
+      u.email,
+      u.contact,
+      u.address,
+      t.id AS trader_id,
+      t.shop_name,
+      t.description,
+      t.created_at
+    FROM user u
+    JOIN trader t ON u.id = t.user_id
+    WHERE u.is_trader = 1 AND u.is_verified = 0
+    ORDER BY t.created_at DESC;
+  `);
+  return rows;
+};

@@ -14,4 +14,8 @@ router.delete("/trader-details/delete/:id",verifyToken,deleteTrader);
 
 router.post("/add-slugs", verifyToken,addSlugs);
 
+
+
+
+
 export default router;

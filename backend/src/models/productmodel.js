@@ -42,3 +42,20 @@ export const getAllProductsModel = async () => {
   const [rows] = await pool.query(sql);
   return rows;
 };
+
+export const updateProductById = async (id, { qty, price, description }) => {
+  const [result] = await pool.query(
+    `UPDATE product 
+     SET qty = ?, price = ?, description = ?
+     WHERE id = ?`,
+    [qty, price, description, id]
+  );
+  return result;
+};
+
+// ✅ Delete product by ID
+export const deleteProductById = async (id) => {
+  const [result] = await pool.query(`DELETE FROM product WHERE id = ?`, [id]);
+  return result;
+};
+

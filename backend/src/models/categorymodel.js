@@ -23,3 +23,17 @@ export const getslugs = async () => {
   `);
   return rows;
 };
+
+export const updateSlugById = async (id, name) => {
+  const [result] = await pool.query(
+    `UPDATE slug SET name = ? WHERE id = ?`,
+    [name, id]
+  );
+  return result;
+};
+
+// ✅ Delete slug by ID
+export const deleteSlugById = async (id) => {
+  const [result] = await pool.query(`DELETE FROM slug WHERE id = ?`, [id]);
+  return result;
+};
