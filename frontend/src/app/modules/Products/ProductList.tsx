@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import axios from "axios";
+
 
 // SVG Icons
 const Search = ({ size = 24, className = "" }: { size?: number; className?: string }) => (
@@ -63,125 +65,96 @@ interface Product {
 }
 
 const ProductList: React.FC = () => {
-  // Sample Product Data
-  const allProducts: Product[] = [
-    {
-      id: '1',
-      name: '64 Crayon Colors',
-      category: 'Crayons',
-      price: 600,
-      quantity: 240,
-      description: 'Premium crayon tub with 240 vibrant colors for all your creative projects.',
-      imageUrl: '/api/placeholder/300/300',
-      inStock: true
-    },
-    {
-      id: '2',
-      name: 'Crayola Crayon Colors',
-      category: 'Crayons',
-      price: 360,
-      quantity: 64,
-      description: '64 beautiful Crayola crayon colors in a convenient storage box.',
-      imageUrl: '/api/placeholder/300/300',
-      inStock: true
-    },
-    {
-      id: '3',
-      name: 'Week Planner',
-      category: 'Planners',
-      price: 500,
-      quantity: 5,
-      description: 'Plan your week with our simple and efficient black and white themed planner.',
-      imageUrl: '/api/placeholder/300/300',
-      inStock: true
-    },
-    {
-      id: '4',
-      name: 'Magnetic Week Planner',
-      category: 'Planners',
-      price: 1850,
-      quantity: 8,
-      description: 'Transparent magnetic week planner to keep track of all your todos and reminders.',
-      imageUrl: '/api/placeholder/300/300',
-      inStock: true
-    },
-    {
-      id: '5',
-      name: 'Pastel Exam Board',
-      category: 'Boards',
-      price: 210,
-      quantity: 10,
-      description: 'Adorable clipboards, featuring lovely illustrations in soft pastel colors.',
-      imageUrl: '/api/placeholder/300/300',
-      inStock: true
-    },
-    {
-      id: '6',
-      name: 'Watercolor Paint Set',
-      category: 'Paints',
-      price: 899,
-      quantity: 24,
-      description: '24 vibrant watercolor paints perfect for artistic creations.',
-      imageUrl: '/api/placeholder/300/300',
-      inStock: true
-    },
-    {
-      id: '7',
-      name: 'Sketch Notebook',
-      category: 'Notebooks',
-      price: 299,
-      quantity: 0,
-      description: 'Premium quality sketch notebook with thick pages.',
-      imageUrl: '/api/placeholder/300/300',
-      inStock: false
-    },
-    {
-      id: '8',
-      name: 'Art Brush Set',
-      category: 'Brushes',
-      price: 550,
-      quantity: 15,
-      description: 'Professional artist brush set with 12 different sizes.',
-      imageUrl: '/api/placeholder/300/300',
-      inStock: true
-    }
-  ];
-
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<string[]>(["All"]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 2000]);
-  const [sortBy, setSortBy] = useState('name');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [sortBy, setSortBy] = useState("name");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
   const [cart, setCart] = useState<{ [key: string]: number }>({});
 
-  // Get unique categories
-  const categories = useMemo(() => {
-    const cats = Array.from(new Set(allProducts.map(p => p.category)));
-    return ['All', ...cats];
+  const API_BASE = process.env.NEXT_PUBLIC_BACKEND || "http://localhost:4000/api";
+
+
+
+
+   useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const token = localStorage.getItem("token"); // assuming token saved after login
+        const res = await axios.get(`${API_BASE}/category/getCategory`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (res.data.success) {
+          // Assuming backend returns: { id, name, ... }
+          const catNames = res.data.data.map((c: any) => c.name);
+          setCategories(["All", ...catNames]);
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
   }, []);
+
+  useEffect(() => {
+  const fetchProducts = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/product/getproducts`);
+      if (res.data.success) {
+        // ✅ Transform backend data into frontend-friendly format
+        const formattedProducts = res.data.data.map((p: any) => ({
+          id: p.id.toString(),
+          name: p.product_name,
+          category: p.child_category_name || p.slug_name || "Uncategorized",
+          price: p.price,
+          quantity: p.qty,
+          description: p.description,
+          imageUrl: p.image_url || "/api/placeholder/300/300",
+          inStock: p.qty > 0,
+        }));
+
+        setAllProducts(formattedProducts);
+      }
+    } catch (err) {
+      console.error("Error fetching products:", err);
+    }
+  };
+
+  fetchProducts();
+}, []);
+
 
   // Filter and sort products
   const filteredProducts = useMemo(() => {
-    let filtered = allProducts.filter(product => {
-      const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           product.description.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
-      const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
-      
+    let filtered = allProducts.filter((product) => {
+      const matchesSearch =
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory =
+        selectedCategory === "All" || product.category === selectedCategory;
+      const matchesPrice =
+        product.price >= priceRange[0] && product.price <= priceRange[1];
+
       return matchesSearch && matchesCategory && matchesPrice;
     });
 
     // Sort products
-    filtered.sort((a, b) => {
+     filtered.sort((a, b) => {
       switch (sortBy) {
-        case 'price-low':
+        case "price-low":
           return a.price - b.price;
-        case 'price-high':
+        case "price-high":
           return b.price - a.price;
-        case 'name':
+        case "name":
           return a.name.localeCompare(b.name);
-        case 'stock':
+        case "stock":
           return b.quantity - a.quantity;
         default:
           return 0;
@@ -189,7 +162,7 @@ const ProductList: React.FC = () => {
     });
 
     return filtered;
-  }, [searchQuery, selectedCategory, priceRange, sortBy]);
+  }, [allProducts, searchQuery, selectedCategory, priceRange, sortBy]);
 
   const addToCart = (productId: string) => {
     setCart(prev => ({
@@ -271,28 +244,28 @@ const ProductList: React.FC = () => {
               <div className="mb-6">
                 <h3 className="font-semibold text-[#374151] mb-3">Category</h3>
                 <div className="space-y-2">
-                  {categories.map(category => (
-                    <button
-                      key={category}
-                      onClick={() => setSelectedCategory(category)}
-                      className={`w-full text-left px-4 py-2 rounded-lg transition-all flex justify-between items-center`}
-                      style={
-                        selectedCategory === category
-                          ? { background: 'linear-gradient(90deg,#FFD1DC,#F8E1FF)', color: '#0f172a' }
-                          : { background: '#ffffff', color: '#374151', border: '1px solid #E9EEF6' }
-                      }
-                    >
-                      <span>{category}</span>
-                      <span className="text-sm opacity-75">
-                        {category === 'All' 
-                          ? allProducts.length 
-                          : allProducts.filter(p => p.category === category).length
-                        }
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
+        {categories.map((category) => (
+          <button
+            key={category}
+            onClick={() => setSelectedCategory(category)}
+            className={`w-full text-left px-4 py-2 rounded-lg transition-all flex justify-between items-center`}
+            style={
+              selectedCategory === category
+                ? {
+                    background: "linear-gradient(90deg,#FFD1DC,#F8E1FF)",
+                    color: "#0f172a",
+                  }
+                : {
+                    background: "#ffffff",
+                    color: "#374151",
+                    border: "1px solid #E9EEF6",
+                  }
+            }
+          >
+            <span>{category}</span>
+          </button>
+        ))}
+      </div>
 
               {/* Price Range */}
               <div className="mb-6">

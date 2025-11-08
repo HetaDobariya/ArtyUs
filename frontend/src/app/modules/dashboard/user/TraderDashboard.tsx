@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState } from 'react';
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { useUser } from "../../../../contexts/UserContext"; 
 import Link from 'next/link';
 
 // SVG Icons as components
@@ -53,7 +55,8 @@ const Package = ({ size = 24, className = "" }: { size?: number; className?: str
 );
 
 interface Product {
-  id: string;
+  _id?: string;
+  slug_id?: string;
   name: string;
   category: string;
   childCategory?: string;
@@ -64,63 +67,40 @@ interface Product {
 }
 
 const TraderDashboard: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>([
-    {
-      id: '1',
-      name: 'Week Planner',
-      category: 'weekly planner',
-      childCategory: 'Paper Planner',
-      price: 500,
-      quantity: 5,
-      description: 'Plan your week with our simple and efficient black and white themed planner.',
-      imageUrl: '/api/placeholder/300/400'
-    },
-    {
-      id: '2',
-      name: 'Magnetic Week Planner',
-      category: 'weekly planner',
-      childCategory: 'Magnetic Planner',
-      price: 1850,
-      quantity: 8,
-      description: 'Transparent magnetic week planner to keep track of all your todos and reminders.',
-      imageUrl: '/api/placeholder/300/400'
-    },
-    {
-      id: '3',
-      name: 'Pastel Exam Board',
-      category: 'exam boards',
-      childCategory: 'Pastel Board',
-      price: 210,
-      quantity: 10,
-      description: 'Adorable clipboards, featuring lovely illustrations in soft pastel colors. A perfect and playful accessory for school, home, or office use.',
-      imageUrl: '/api/placeholder/300/400'
-    },
-    {
-      id: '4',
-      name: 'Pastel Exam Boards',
-      category: 'exam boards',
-      childCategory: 'Clip Board',
-      price: 120,
-      quantity: 15,
-      description: 'Adorable clipboards in soft pastel colors. A perfect and playful accessory for school, home, or office use.',
-      imageUrl: '/api/placeholder/300/400'
-    }
-  ]);
+  const API_BASE = process.env.NEXT_PUBLIC_BACKEND || "http://localhost:5000/api/product";
+  const { token } = useAuth();
 
+  // ✅ single source of truth for all products
+  const [products, setProducts] = useState<Product[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
+  const [imagePreview, setImagePreview] = useState<string>("");
 
   const [formData, setFormData] = useState({
-    name: '',
-    category: '',
-    childCategory: '',
-    price: '',
-    quantity: '',
-    description: '',
-    imageFile: null as File | null
+    name: "",
+    category: "",
+    childCategory: "",
+    price: "",
+    quantity: "",
+    description: "",
+    imageFile: null as File | null,
   });
+
+  const fetchProducts = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/getproducts`);
+      if (res.data.success) {
+        setProducts(res.data.data);
+      }
+    } catch (err) {
+      console.error("Error fetching products:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   const categories = ['weekly planner', 'exam boards', 'notebooks', 'art supplies', 'crafts'];
 
@@ -130,6 +110,23 @@ const TraderDashboard: React.FC = () => {
     "notebooks": ["Plain", "Ruled", "Dotted", "Custom Cover"],
     "art supplies": ["Brushes", "Canvas", "Paints", "Markers"],
     "crafts": ["Stickers", "Washi Tape", "Scrapbook Materials"],
+  };
+
+   const uploadToCloudinary = async (file: File): Promise<string> => {
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!;
+
+    const data = new FormData();
+    data.append("file", file);
+    data.append("upload_preset", uploadPreset);
+
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      method: "POST",
+      body: data,
+    });
+
+    const json = await res.json();
+    return json.secure_url;
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -142,121 +139,75 @@ const TraderDashboard: React.FC = () => {
     if (file) {
       setFormData(prev => ({ ...prev, imageFile: file }));
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
+      reader.onloadend = () => setImagePreview(reader.result as string);
       reader.readAsDataURL(file);
     }
   };
 
-  const uploadToCloudinary = async (file: File): Promise<string> => {
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
-    if (!cloudName || !uploadPreset) {
-      throw new Error('Cloudinary credentials not configured');
-    }
-
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', uploadPreset);
-
-    try {
-      const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-        {
-          method: 'POST',
-          body: formData,
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Upload failed');
-      }
-
-      const data = await response.json();
-      return data.secure_url;
-    } catch (error) {
-      console.error('Cloudinary upload error:', error);
-      throw error;
-    }
-  };
 
   const resetForm = () => {
     setFormData({
-      name: '',
-      category: '',
-      childCategory: '',
-      price: '',
-      quantity: '',
-      description: '',
-      imageFile: null
+      name: "",
+      category: "",
+      childCategory: "",
+      price: "",
+      quantity: "",
+      description: "",
+      imageFile: null,
     });
-    setImagePreview('');
+    setImagePreview("");
   };
 
-  const handleAddProduct = async () => {
-    if (!formData.name || !formData.category || !formData.price || !formData.quantity) {
-      alert('Please fill all required fields');
-      return;
-    }
+  const handleAddProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      let imageUrl = "";
+      if (formData.imageFile) {
+        imageUrl = await uploadToCloudinary(formData.imageFile);
+      }
 
-    let imageUrl = '/api/placeholder/300/400';
-    if (formData.imageFile) {
-      imageUrl = await uploadToCloudinary(formData.imageFile);
-    }
+      const payload = {
+        product_name: formData.name,
+        category: formData.category,
+        childCategory: formData.childCategory,
+        price: formData.price,
+        qty: formData.quantity,
+        description: formData.description,
+        image_url: imageUrl,
+      };
 
-    const newProduct: Product = {
-      id: Date.now().toString(),
-      name: formData.name,
-      category: formData.category,
-      childCategory: formData.childCategory || undefined,
-      price: parseFloat(formData.price),
-      quantity: parseInt(formData.quantity),
-      description: formData.description,
-      imageUrl
-    };
+      const res = await axios.post(`${API_BASE}/add-product`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    setProducts(prev => [...prev, newProduct]);
-    setShowAddModal(false);
-    resetForm();
-  };
-
-  const handleEditProduct = async () => {
-    if (!selectedProduct || !formData.name || !formData.category || !formData.price || !formData.quantity) {
-      alert('Please fill all required fields');
-      return;
-    }
-
-    let imageUrl = selectedProduct.imageUrl;
-    if (formData.imageFile) {
-      imageUrl = await uploadToCloudinary(formData.imageFile);
-    }
-
-    const updatedProduct: Product = {
-      ...selectedProduct,
-      name: formData.name,
-      category: formData.category,
-      childCategory: formData.childCategory || undefined,
-      price: parseFloat(formData.price),
-      quantity: parseInt(formData.quantity),
-      description: formData.description,
-      imageUrl
-    };
-
-    setProducts(prev => prev.map(p => p.id === selectedProduct.id ? updatedProduct : p));
-    setShowEditModal(false);
-    setSelectedProduct(null);
-    resetForm();
-  };
-
-  const handleDeleteProduct = (id: string) => {
-    if (confirm('Are you sure you want to delete this product?')) {
-      setProducts(prev => prev.filter(p => p.id !== id));
+      if (res.data.success) {
+        alert("✅ Product added successfully!");
+        fetchProducts();
+        setShowAddModal(false);
+        resetForm();
+      }
+    } catch (err) {
+      console.error("Error adding product:", err);
+      alert("❌ Failed to add product");
     }
   };
 
-  const openEditModal = (product: Product) => {
+
+   const handleDeleteProduct = async (id: string) => {
+    if (!confirm("Are you sure?")) return;
+    try {
+      const res = await axios.delete(`${API_BASE}/delete/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.data.success) fetchProducts();
+    } catch (err) {
+      console.error("Error deleting product:", err);
+    }
+  };
+
+
+   const openEditModal = (product: Product) => {
     setSelectedProduct(product);
     setFormData({
       name: product.name,
@@ -265,7 +216,7 @@ const TraderDashboard: React.FC = () => {
       price: product.price.toString(),
       quantity: product.quantity.toString(),
       description: product.description,
-      imageFile: null
+      imageFile: null,
     });
     setImagePreview(product.imageUrl);
     setShowEditModal(true);
@@ -274,6 +225,41 @@ const TraderDashboard: React.FC = () => {
   const openAddModal = () => {
     resetForm();
     setShowAddModal(true);
+  };
+
+   const handleEditProduct = async () => {
+    if (!selectedProduct) return;
+
+    try {
+      let imageUrl = selectedProduct.imageUrl;
+      if (formData.imageFile) {
+        imageUrl = await uploadToCloudinary(formData.imageFile);
+      }
+
+      const payload = {
+        id: selectedProduct._id,
+        product_name: formData.name,
+        category: formData.category,
+        childCategory: formData.childCategory,
+        qty: formData.quantity,
+        price: formData.price,
+        description: formData.description,
+        image_url: imageUrl,
+      };
+
+      const res = await axios.put(`${API_BASE}/update/${selectedProduct._id}`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.data.success) {
+        alert("✅ Product updated successfully!");
+        fetchProducts();
+        setShowEditModal(false);
+        resetForm();
+      }
+    } catch (err) {
+      console.error("Error updating product:", err);
+    }
   };
 
   return (
