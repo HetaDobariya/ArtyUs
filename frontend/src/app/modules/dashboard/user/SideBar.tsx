@@ -1,61 +1,52 @@
 'use client';
-import React, { useState } from 'react';
-
-// Assuming these components are still imported correctly
-import UserInfo from './UserInfo';
+import { useState } from 'react';
+import UserInfo from './UserInfo'; // <-- Import your cleaned-up component
 import OrderHistory from './OrderHistory';
 
+// Define the tabs
+const TABS = [
+  { id: 'Profile', label: 'Profile' },
+  { id: 'Orders', label: 'Orders' },
+];
+
 export default function SideBar() {
-    // 1. Define the data for the sidebar tabs
-    const data = [
-        {
-            label: 'Profile',
-            value: 'Profile',
-            desc: <UserInfo />, // The component to render
-        },
-        {
-            // Note: I've used 'orders' (lowercase) for consistency with the original code,
-            // but 'Orders' would also work as long as 'label' and 'value' match.
-            label: 'Orders', // This is what the user sees
-            value: 'orders', // This is the unique key used for state tracking
-            desc: <OrderHistory />, // The component to render
-        },
-    ];
-
-    // 2. State to track the active tab's 'value'
-    const [activeTab, setActiveTab] = useState('Profile'); // Default to 'Profile'
-
-    // 3. Dynamically find the component (desc) for the active tab
-    const activeContent = data.find(item => item.value === activeTab)?.desc;
+    // State to keep track of the active tab, 'Profile' is the default
+    const [activeTab, setActiveTab] = useState('Profile');
 
     return (
-        // Use flex to layout the sidebar (nav) and the content area (div) side-by-side
-        <div className="h-screen m-10 flex">
-            {/* Sidebar/Navigation Area */}
-            <nav className="w-40 border-r border-gray-200 p-4 shrink-0">
-                <ul className="space-y-2">
-                    {data.map(({ label, value }) => (
-                        <li key={value}>
-                            <button
-                                onClick={() => setActiveTab(value)} // Update state on click
-                                className={`w-full text-left p-2 rounded-lg text-xl font-bold transition-colors duration-200
-                                    ${activeTab === value
-                                        ? 'bg-blue-600 text-white shadow-md' // Active style
-                                        : 'text-gray-700 hover:bg-gray-100' // Inactive style
-                                    }
-                                `}
-                            >
-                                {label}
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            </nav>
+        // This is the main page layout you originally had in UserInfo.tsx
+        <div className="flex flex-row min-h-screen my-10 mx-24 gap-12 bg-white">
+            
+            {/* 1. Left Sidebar Navigation (Now Dynamic) */}
+            <div className="flex flex-col w-48 border-r border-gray-200 flex-shrink-0">
+                {TABS.map(tab => {
+                    const isActive = activeTab === tab.id;
+                    
+                    // Conditionally set the styles based on the active tab
+                    const buttonClasses = `
+                        py-2 px-4 text-left cursor-pointer
+                        ${isActive 
+                            ? 'bg-gray-100 border-b-2 border-black text-black font-semibold' 
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }
+                    `;
 
-            {/* Content Display Area */}
-            <div className="flex-grow p-4">
-                {/* 4. Render the active component */}
-                {activeContent}
+                    return (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={buttonClasses}
+                        >
+                            {tab.label}
+                        </button>
+                    );
+                })}
+            </div>
+
+            {/* 2. Content Area (Conditionally Renders Component) */}
+            <div className="flex-1 w-full">
+                {activeTab === 'Profile' && <UserInfo />}
+                {activeTab === 'Orders' && <OrderHistory />}
             </div>
         </div>
     );
