@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 
 // SVG Icons
 const Users = ({ size = 24, className = "" }: { size?: number; className?: string }) => (
@@ -122,6 +122,53 @@ const AdminDashboard: React.FC = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedEntity, setSelectedEntity] = useState<any>(null);
   const [categoryForm, setCategoryForm] = useState({ name: '', slug: '' });
+  // Add state to store fetched categories
+  const [fetchedCategories, setFetchedCategories] = useState<{ id: string, name: string }[]>([]);
+
+  // Add useEffect to fetch categories on component mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const childCatUrl = `${process.env.NEXT_PUBLIC_BACKEND}/category/getChildCategory`;
+        const response = await fetch(childCatUrl, {
+          credentials: 'include'
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch categories: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log(data)
+
+        let categoriesArray = null;
+
+        if (data.success) {
+          // First, check for the most nested structure: data.data.data
+          if (data.data && data.data.data && Array.isArray(data.data.data)) {
+            categoriesArray = data.data.data;
+          }
+          // If not found, check for the other structure: data.data
+          else if (data.data && Array.isArray(data.data)) {
+            categoriesArray = data.data;
+          }
+        }
+
+        // Now, update the state if we found a valid array
+        if (categoriesArray) {
+          setFetchedCategories(categoriesArray);
+        } else {
+          // This will now only trigger if neither path was valid
+          console.warn("Could not find categories array in API response:", data);
+        }
+
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []); // Empty dependency array means this runs once on mount
 
   // Sample Data
   const [users, setUsers] = useState<User[]>([
@@ -158,7 +205,7 @@ const AdminDashboard: React.FC = () => {
   };
 
   // Filtered Data
-  const filteredUsers = useMemo(() => 
+  const filteredUsers = useMemo(() =>
     users.filter(u => u.name.toLowerCase().includes(searchQuery.toLowerCase()) || u.email.toLowerCase().includes(searchQuery.toLowerCase())),
     [users, searchQuery]
   );
@@ -197,19 +244,17 @@ const AdminDashboard: React.FC = () => {
   };
 
   const handleAddCategory = () => {
+    // 1. Log the form state to the console as requested
+    console.log("Category form submitted:", categoryForm);
+    // categoryForm.name will now contain the ID of the selected category
+
+    // 2. Validate fields
     if (!categoryForm.name || !categoryForm.slug) {
       alert('Please fill all fields');
       return;
     }
 
-    const newCategory: Category = {
-      id: Date.now().toString(),
-      name: categoryForm.name,
-      slug: categoryForm.slug,
-      productCount: 0
-    };
-
-    setCategories(prev => [...prev, newCategory]);
+    // 3. Reset form and close modal
     setCategoryForm({ name: '', slug: '' });
     setShowCategoryModal(false);
   };
@@ -228,12 +273,13 @@ const AdminDashboard: React.FC = () => {
   return (
     <div
       className="min-h-screen"
-      style={{ background: 'linear-gradient(135deg,#FBE8F0 0%,#E8FFF4 50%,#EEF2FF 100%)' }}
+      //style={{ background: 'linear-gradient(135deg,#FBE8F0 0%,#E8FFF4 50%,#EEF2FF 100%)' }}
+      style={{ background: '#FAF9F6' }}
     >
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-40" style={{ borderBottom: '1px solid #F3E9FF' }}>
         <div className="container mx-auto px-6 py-4">
-         <h1 className="text-3xl font-bold text-black"> Admin Dashboard </h1>
+          <h1 className="text-3xl font-bold text-black text-center"> Admin Dashboard </h1>
         </div>
       </header>
 
@@ -242,42 +288,44 @@ const AdminDashboard: React.FC = () => {
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             <div className="bg-white rounded-2xl shadow-lg p-6 transform transition-all hover:scale-105"
-                 style={{ border: '1px solid transparent', boxShadow: '0 6px 18px rgba(20,20,30,0.04)' }}>
+              style={{ border: '1px solid transparent', boxShadow: '0 6px 18px rgba(20,20,30,0.04)' }}>
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-[#4b5563] text-sm font-medium">Total Users</p>
                   <p className="text-3xl font-bold" style={{ color: '#1f2937' }}>{stats.totalUsers}</p>
                   <p className="text-sm" style={{ color: '#4b5563', marginTop: 4 }}>{stats.activeUsers} active</p>
                 </div>
-                <div className="p-4 rounded-full" style={{ background: '#EAF6ED' }}>
+                {/* <div className="p-4 rounded-full" style={{ background: '#EAF6ED' }}> */}
+                <div className="p-4 rounded-full" style={{ background: '#E0F4F8' }}>
                   <Users className="text-[#8BBF9F]" size={32} />
                 </div>
               </div>
             </div>
 
             <div className="bg-white rounded-2xl shadow-lg p-6 transform transition-all hover:scale-105"
-                 style={{ border: '1px solid transparent', boxShadow: '0 6px 18px rgba(20,20,30,0.04)' }}>
+              style={{ border: '1px solid transparent', boxShadow: '0 6px 18px rgba(20,20,30,0.04)' }}>
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-[#4b5563] text-sm font-medium">Total Traders</p>
                   <p className="text-3xl font-bold" style={{ color: '#1f2937' }}>{stats.totalTraders}</p>
                   <p className="text-sm" style={{ color: '#4b5563', marginTop: 4 }}>{stats.verifiedTraders} verified</p>
                 </div>
-                <div className="p-4 rounded-full" style={{ background: '#E8F6F1' }}>
+                {/* <div className="p-4 rounded-full" style={{ background: '#E8F6F1' }}> */}
+                <div className="p-4 rounded-full" style={{ background: '#FDEBEC' }}>
                   <Store className="text-[#6E9BBF]" size={32} />
                 </div>
               </div>
             </div>
 
             <div className="bg-white rounded-2xl shadow-lg p-6 transform transition-all hover:scale-105"
-                 style={{ border: '1px solid transparent', boxShadow: '0 6px 18px rgba(20,20,30,0.04)' }}>
+              style={{ border: '1px solid transparent', boxShadow: '0 6px 18px rgba(20,20,30,0.04)' }}>
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-[#4b5563] text-sm font-medium">Total Products</p>
                   <p className="text-3xl font-bold" style={{ color: '#1f2937' }}>{stats.totalProducts}</p>
                   <p className="text-sm" style={{ color: '#4b5563', marginTop: 4 }}>{stats.totalCategories} categories</p>
                 </div>
-                <div className="p-4 rounded-full" style={{ background: '#FFF5F8' }}>
+                <div className="p-4 rounded-full" style={{ background: '#F7F3E8' }}>
                   <Package className="text-[#A8E6CF]" size={32} />
                 </div>
               </div>
@@ -295,7 +343,7 @@ const AdminDashboard: React.FC = () => {
                 className="flex-1 min-w-[120px] px-6 py-3 rounded-lg font-medium transition-all"
                 style={
                   activeTab === tab
-                    ? { background: 'linear-gradient(90deg,#FFD1DC,#F8E1FF)', color: '#0f172a' }
+                    ? { background: '#FDEBEC', color: '#1F2937' } // Soft Pink
                     : { color: '#374151', background: 'transparent' }
                 }
               >
@@ -330,7 +378,7 @@ const AdminDashboard: React.FC = () => {
                 <button
                   onClick={() => setShowCategoryModal(true)}
                   className="flex items-center gap-2 px-6 py-3 rounded-lg transition-all"
-                  style={{ background: 'linear-gradient(90deg,#A8E6CF,#C8F0FF)', color: '#0f172a', boxShadow: '0 6px 18px rgba(20,20,30,0.04)' }}
+                  style={{ background: '#1F2937', color: '#FFFFFF', boxShadow: '0 6px 18px rgba(20,20,30,0.04)' }}
                 >
                   <Plus size={20} />
                   Add Category
@@ -345,7 +393,7 @@ const AdminDashboard: React.FC = () => {
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden" style={{ border: '1px solid #F3E9FF' }}>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead style={{ background: 'linear-gradient(90deg,#C9B6FF,#FFD6E8)', color: '#fff' }}>
+                <thead style={{ background: '#FDEBEC', color: '#1F2937' }}>
                   <tr>
                     <th className="px-6 py-4 text-left">Name</th>
                     <th className="px-6 py-4 text-left">Email</th>
@@ -402,7 +450,7 @@ const AdminDashboard: React.FC = () => {
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden" style={{ border: '1px solid #F3E9FF' }}>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead style={{ background: 'linear-gradient(90deg,#C9B6FF,#FFD6E8)', color: '#fff' }}>
+                <thead style={{ background: '#FDEBEC', color: '#1F2937' }}>
                   <tr>
                     <th className="px-6 py-4 text-left">Name</th>
                     <th className="px-6 py-4 text-left">Email</th>
@@ -468,7 +516,7 @@ const AdminDashboard: React.FC = () => {
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden" style={{ border: '1px solid #F3E9FF' }}>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead style={{ background: 'linear-gradient(90deg,#C9B6FF,#FFD6E8)', color: '#fff' }}>
+                <thead style={{ background: '#FDEBEC', color: '#1F2937' }}>
                   <tr>
                     <th className="px-6 py-4 text-left">Product</th>
                     <th className="px-6 py-4 text-left">Category</th>
@@ -556,16 +604,23 @@ const AdminDashboard: React.FC = () => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>Category Name</label>
-                  <input
-                    type="text"
-                    value={categoryForm.name}
+                  <select
+                    value={categoryForm.name} // This will now store the selected category ID
                     onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
-                    placeholder="e.g., Art Supplies"
                     className="w-full px-4 py-3 rounded-lg transition-all"
-                    style={{ border: '1px solid #E9EEF6', outline: 'none', color: '#0f172a' }}
+                    // Added background: '#fff' so it's not transparent
+                    style={{ border: '1px solid #E9EEF6', outline: 'none', color: '#0f172a', background: '#fff' }}
                     onFocus={(e) => (e.currentTarget.style.boxShadow = '0 0 0 6px rgba(201,182,255,0.12)')}
                     onBlur={(e) => (e.currentTarget.style.boxShadow = 'none')}
-                  />
+                  >
+                    <option value="" disabled>Select a category</option>
+                    {/* Map over the fetched categories to create options */}
+                    {fetchedCategories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>
@@ -594,8 +649,7 @@ const AdminDashboard: React.FC = () => {
                   <button
                     onClick={handleAddCategory}
                     className="flex-1 px-6 py-3 rounded-lg transition-all"
-                    style={{ background: 'linear-gradient(90deg,#FFD1DC,#F8E1FF)', color: '#0f172a', boxShadow: '0 6px 18px rgba(20,20,30,0.04)' }}
-                  >
+                    style={{ background: '#1F2937', color: '#FFFFFF', boxShadow: '0 6px 18px rgba(20,20,30,0.04)' }}>
                     Add
                   </button>
                 </div>
