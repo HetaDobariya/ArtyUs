@@ -1,191 +1,264 @@
 'use client';
-
-import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useState, useEffect } from 'react';
 import Image1 from '../../../../../public/image/HomeImages/trader.png';
-// NOTE: Ensure you place the file in the correct path or adjust the import.
 import EditTraderDetails from './EditTraderDetails';
+import TraderDashboard from './TraderDashboard';
 
-// 1. Define the nested User Data structure
-interface UserData {
-    id: number;
-    name: string;
-    email: string;
-    address: string;
-    contact: string;
-    trader: {
-        trader_id: number;
-        business_name: string; // Shop Name
-        shop_address: string; // Shop Address
-        phone: string;         // Shop Contact Number
-        description: string;
-    } | null;
-    iat: number;
-    exp: number;
-}
-
-// 2. Define the overall structure of the JSON response
-interface BackendResponse {
-    user: UserData;
+interface TraderData {
+  id: string;
+  name: string;
+  email: string;
+  address: string;
+  contact: string;
+  role: string;
+  trader: {
+    trader_id: number;
+    business_name: string;
+    shop_address: string;
+    phone: string;
+    description: string;
+  } | null;
 }
 
 const TraderInfo = () => {
-    const [traderData, setTraderData] = useState<UserData | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [isEditing, setIsEditing] = useState(false); // 👈 Reintroduced state for the modal
+  const [traderData, setTraderData] = useState<TraderData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTab, setSelectedTab] = useState<'profile' | 'orders' | 'dashboard'>('profile');
 
-    // --- Data Fetching Logic (Unchanged) ---
-    const fetchTraderData = async () => {
-        try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/current-user`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include'
-            });
+  const handleEditClick = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
 
-            if (!response.ok) {
-                throw new Error('Failed to fetch trader data.');
-            }
-
-            const responseData: BackendResponse = await response.json();
-            setTraderData(responseData.user);
-
-        } catch (err) {
-            console.error('Fetch error:', err);
-            setError('Could not load account details. Please check server status.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchTraderData();
-    }, []);
-
-    // --- Handler for successful update from the form ---
-    const handleUpdateSuccess = (updatedFormData: { companyName: string; shopContactNumber: string; shopAddress: string; description: string; }) => {
-        if (traderData && traderData.trader) {
-            // Update the local state with the new data instantly
-            setTraderData({
-                ...traderData,
-                trader: {
-                    ...traderData.trader,
-                    business_name: updatedFormData.companyName,
-                    phone: updatedFormData.shopContactNumber,
-                    shop_address: updatedFormData.shopAddress,
-                    description: updatedFormData.description,
-                }
-            });
-        }
-        setIsEditing(false); // Close the modal
-    };
-
-    const shopDetails = traderData?.trader;
-
-    // --- Determine Initial Data for the Edit Form ---
-    const initialFormData = shopDetails ? {
-        companyName: shopDetails.business_name,
-        shopContactNumber: shopDetails.phone,
-        shopAddress: shopDetails.shop_address,
-        description: shopDetails.description,
-    } : {
-        companyName: '', shopContactNumber: '', shopAddress: '', description: '',
-    };
-
-    // --- Loading, Error, and Not Found States ---
-    if (isLoading) {
-        return <div className="p-10 text-center text-xl font-semibold">Loading account details...</div>;
-    }
-
-    if (error) {
-        return <div className="p-10 text-center text-red-600 font-semibold">Error: {error}</div>;
-    }
-
-    if (!shopDetails) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-screen p-4">
-                <p className="text-xl font-semibold text-gray-700">
-                    No shop details found. Please complete your trader profile.
-                </p>
-            </div>
-        );
-    }
-
-    // --- Final Display Logic ---
-    return (
-        <div className="flex justify-center min-h-screen p-4">
-            <div className="flex flex-col lg:flex-row w-full max-w-5xl mx-auto my-10 bg-white shadow-xl rounded-lg overflow-hidden">
-
-                {/* Left Side: Details */}
-                <div className="w-full lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center">
-                    <h3 className="text-3xl font-bold text-gray-900 mb-6 border-b-2 border-gray-300 pb-3">
-                        Account Details
-                    </h3>
-
-                    <div className="flex flex-col gap-4">
-                        {/* Shop Name */}
-                        <div className="py-2 border-b border-gray-200">
-                            <p className="text-lg text-gray-900 font-normal">
-                                Shop Name: <span className="font-semibold">{shopDetails.business_name}</span>
-                            </p>
-                        </div>
-                        {/* Contact */}
-                        <div className="py-2 border-b border-gray-200">
-                            <p className="text-lg text-gray-900 font-normal">
-                                Contact: <span className="font-semibold">{shopDetails.phone}</span>
-                            </p>
-                        </div>
-                        {/* Address */}
-                        <div className="py-2 border-b border-gray-200">
-                            <p className="text-lg text-gray-900 font-normal">
-                                Address: <span className="font-semibold">{shopDetails.shop_address}</span>
-                            </p>
-                        </div>
-                        {/* Description */}
-                        <div className="py-2 border-b border-gray-200">
-                            <p className="text-lg text-gray-900 font-normal">
-                                Description: <span className="font-semibold">{shopDetails.description}</span>
-                            </p>
-                        </div>
-
-                        {/* EDIT BUTTON ACTION */}
-                        <div className="mt-8">
-                            <button
-                                onClick={() => setIsEditing(true)} // 👈 Link to open the modal
-                                className="px-8 py-3 bg-black text-white text-sm font-semibold rounded-lg hover:bg-gray-800 transition duration-200"
-                            >
-                                EDIT DETAILS
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Right Side: Image */}
-                <div className="hidden lg:flex w-full lg:w-1/2 p-8 items-center justify-center bg-gray-50 rounded-r-lg">
-                    <Image
-                        src={Image1}
-                        alt="Trader Profile Illustration"
-                        className="object-contain w-full h-full max-w-lg"
-                    />
-                </div>
-            </div>
-
-            {/* --- Edit Modal Rendering --- */}
-            {isEditing && (
-                <div className="fixed inset-0  bg-opacity-30 flex items-center justify-center p-4 z-50 backdrop-blur-xl">
-                    <div className="bg-white p-0 rounded-lg max-w-lg w-full">
-                        <EditTraderDetails
-                            companyId={String(shopDetails.trader_id)} // Pass the trader_id/companyId
-                            initialData={initialFormData}             // Pass the current shop data
-                            onClose={() => setIsEditing(false)}       // Close function
-                            onUpdateSuccess={handleUpdateSuccess}     // Update local state function
-                        />
-                    </div>
-                </div>
-            )}
-        </div>
+  const handleUpdateSuccess = (updatedValues: {
+    companyName: string;
+    shopContactNumber: string;
+    shopAddress: string;
+    description: string;
+  }) => {
+    setTraderData((prev) =>
+      prev && prev.trader
+        ? {
+            ...prev,
+            trader: {
+              ...prev.trader,
+              business_name: updatedValues.companyName,
+              phone: updatedValues.shopContactNumber,
+              shop_address: updatedValues.shopAddress,
+              description: updatedValues.description,
+            },
+          }
+        : prev
     );
+    setIsModalOpen(false);
+  };
+
+  // Fetch trader data
+  useEffect(() => {
+    const fetchTraderData = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/current-user`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          setError(data.message || 'Failed to load trader data.');
+          return;
+        }
+        setTraderData(data.user);
+      } catch (err) {
+        console.error('Error fetching trader data:', err);
+        setError('Network error: Could not connect to the API.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (process.env.NEXT_PUBLIC_BACKEND) fetchTraderData();
+    else {
+      // fallback mock data
+      setTraderData({
+        id: 't123',
+        name: 'Aman Traders',
+        email: 'amantrader@gmail.com',
+        address: 'Ahmedabad',
+        contact: '9876543210',
+        role: 'trader',
+        trader: {
+          trader_id: 1,
+          business_name: 'Aman Traders Pvt. Ltd.',
+          shop_address: 'SG Highway, Ahmedabad',
+          phone: '9876543210',
+          description: 'We deal in premium electronics and gadgets.',
+        },
+      });
+      setLoading(false);
+    }
+  }, []);
+
+  if (loading)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-gray-700">Loading trader details...</p>
+      </div>
+    );
+
+  if (error || !traderData)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-red-600">{error || 'Trader data not available.'}</p>
+      </div>
+    );
+
+  const shopDetails = traderData.trader;
+
+  return (
+    <div className="flex min-h-screen bg-white my-10 mx-20 gap-12">
+      {/* 🔹 Sidebar */}
+      <div className="bg-gray-100 p-6 rounded-2xl shadow-md flex flex-col w-64 h-max">
+        <h2 className="text-xl font-bold mb-6 text-gray-800 text-center">My Account</h2>
+
+        <button
+          onClick={() => setSelectedTab('profile')}
+          className={`text-left px-4 py-3 rounded-lg font-medium mb-2 transition-colors duration-200 ${
+            selectedTab === 'profile' ? 'bg-black text-white' : 'text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          Profile
+        </button>
+
+        <button
+          onClick={() => setSelectedTab('orders')}
+          className={`text-left px-4 py-3 rounded-lg font-medium mb-2 transition-colors duration-200 ${
+            selectedTab === 'orders' ? 'bg-black text-white' : 'text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          Orders
+        </button>
+
+        {/* Dashboard visible only for traders */}
+        {traderData.role === 'trader' && (
+          <button
+            onClick={() => setSelectedTab('dashboard')}
+            className={`text-left px-4 py-3 rounded-lg font-medium mb-2 transition-colors duration-200 ${
+              selectedTab === 'dashboard' ? 'bg-black text-white' : 'text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Dashboard
+          </button>
+        )}
+      </div>
+
+      {/* 🔹 Right Section */}
+      <div className="flex-1 transition-all duration-300">
+        {selectedTab === 'profile' ? (
+          <div className="flex flex-row gap-12 items-start">
+            {/* Account Details */}
+            <div className="flex-1 bg-white p-8 rounded-lg shadow-md">
+              <h3 className="text-3xl font-bold text-gray-800 mb-8 pb-2 border-b-2 border-gray-300">
+                Trader Account Details
+              </h3>
+
+              <div className="flex flex-col gap-5">
+                <div>
+                  <h4 className="text-base text-gray-700">Shop Name: {shopDetails?.business_name}</h4>
+                  <div className="h-0.5 w-full bg-gray-300 mt-1"></div>
+                </div>
+
+                <div>
+                  <h4 className="text-base text-gray-700">Contact No: {shopDetails?.phone}</h4>
+                  <div className="h-0.5 w-full bg-gray-300 mt-1"></div>
+                </div>
+
+                <div>
+                  <h4 className="text-base text-gray-700">Address: {shopDetails?.shop_address}</h4>
+                  <div className="h-0.5 w-full bg-gray-300 mt-1"></div>
+                </div>
+
+                <div>
+                  <h4 className="text-base text-gray-700">Description: {shopDetails?.description}</h4>
+                  <div className="h-0.5 w-full bg-gray-300 mt-1"></div>
+                </div>
+
+                <div className="mt-8">
+                  <button
+                    onClick={handleEditClick}
+                    className="px-6 py-3 text-sm rounded-xl font-semibold tracking-wider uppercase bg-black text-white border-2 border-black hover:bg-white hover:text-black transition duration-150"
+                  >
+                    EDIT DETAILS
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Image */}
+            <div className="w-[50%] flex justify-center items-center">
+              <Image src={Image1} alt="Trader Illustration" className="object-contain w-[90%] h-auto" />
+            </div>
+          </div>
+        ) : selectedTab === 'orders' ? (
+          <div className="bg-white p-8 rounded-lg shadow-md">
+            <h3 className="text-3xl font-bold text-gray-800 mb-8 pb-2 border-b-2 border-gray-300">
+              My Orders
+            </h3>
+
+            <table className="min-w-full text-left border border-gray-200 rounded-lg">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="py-3 px-4 border-b">Order ID</th>
+                  <th className="py-3 px-4 border-b">Date</th>
+                  <th className="py-3 px-4 border-b">Product</th>
+                  <th className="py-3 px-4 border-b">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="py-3 px-4 border-b">#ORD-101</td>
+                  <td className="py-3 px-4 border-b">2025-11-03</td>
+                  <td className="py-3 px-4 border-b">Bluetooth Speaker</td>
+                  <td className="py-3 px-4 border-b text-green-600 font-semibold">Delivered</td>
+                </tr>
+                <tr>
+                  <td className="py-3 px-4 border-b">#ORD-098</td>
+                  <td className="py-3 px-4 border-b">2025-11-01</td>
+                  <td className="py-3 px-4 border-b">Wireless Mouse</td>
+                  <td className="py-3 px-4 border-b text-yellow-600 font-semibold">Pending</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="bg-white p-8 rounded-lg shadow-md">
+           <TraderDashboard />
+          </div>
+        )}
+      </div>
+
+      {/* Edit Modal */}
+      {isModalOpen && shopDetails && (
+        <div className="fixed inset-0 backdrop-blur-lg bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
+            <EditTraderDetails
+              companyId={String(shopDetails.trader_id)}
+              initialData={{
+                companyName: shopDetails.business_name,
+                shopContactNumber: shopDetails.phone,
+                shopAddress: shopDetails.shop_address,
+                description: shopDetails.description,
+              }}
+              onUpdateSuccess={handleUpdateSuccess}
+              onClose={handleCloseModal}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default TraderInfo;
