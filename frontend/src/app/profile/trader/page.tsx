@@ -1,4 +1,4 @@
-import TraderInfo from '../../modules/dashboard/trader/TraderInfo';
+import TraderInfo from "@/app/modules/dashboard/trader/TraderInfo";
 
 const page = () => {
     return (
