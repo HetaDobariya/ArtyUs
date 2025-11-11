@@ -1,4 +1,4 @@
-import { findUserByEmail, createUser, createTrader, updateTraderById  } from '../models/tradermodel.js';
+import { findUserByEmail, createUser, createTrader, updateTraderById, verifyTraderById ,getUnverifiedTraderList  } from '../models/tradermodel.js';
 import bcrypt from 'bcrypt';
 
 export const signup = async (req, res) => {
@@ -46,5 +46,49 @@ export const updateTrader = async (req, res) => {
   } catch (error) {
     console.error('Error updating user:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+export const verifyTrader = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ error: "Trader ID is required" });
+    }
+
+    const result = await verifyTraderById(id);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Trader not found or already verified" });
+    }
+
+    res.status(200).json({ message: "Trader verified successfully" });
+  } catch (error) {
+    console.error("Error verifying trader:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const getUnverifiedTraders = async (req, res) => {
+  try {
+    const traders = await getUnverifiedTraderList();
+
+    if (!traders || traders.length === 0) {
+      return res.status(404).json({ message: "No unverified traders found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      count: traders.length,
+      data: traders,
+    });
+  } catch (error) {
+    console.error("Error fetching unverified traders:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while fetching unverified traders",
+    });
   }
 };
