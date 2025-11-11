@@ -452,6 +452,11 @@ export default function Navigation() {
                                   Become a Trader
                                 </Link>
                               </div>
+                              <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
+                                <Link href="/modules/auth/ServiceProviderSingup" className="font-semibold text-gray-900" onClick={close}>
+                                  Become a Service Provider
+                                </Link>
+                              </div>
                             </div>
                           </div>
                         </Popover.Panel>
