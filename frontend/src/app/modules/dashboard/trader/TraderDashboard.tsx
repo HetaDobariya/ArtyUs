@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-// SVG Icons as components
+// SVG Icons as components (keep all your existing icons)
 const Upload = ({ size = 24, className = "" }: { size?: number; className?: string }) => (
   <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -52,6 +52,12 @@ const Package = ({ size = 24, className = "" }: { size?: number; className?: str
   </svg>
 );
 
+interface Category {
+  id: number;
+  slug_name: string;
+  child_category_name: string;
+}
+
 interface Product {
   id: string;
   name: string;
@@ -67,7 +73,7 @@ const TraderDashboard: React.FC = () => {
     {
       id: '1',
       name: 'Week Planner',
-      category: 'weekly planner',
+      category: 'Weekly Planner',
       price: 500,
       quantity: 5,
       description: 'Plan your week with our simple and efficient black and white themed planner.',
@@ -76,7 +82,7 @@ const TraderDashboard: React.FC = () => {
     {
       id: '2',
       name: 'Magnetic Week Planner',
-      category: 'weekly planner',
+      category: 'Weekly Planner',
       price: 1850,
       quantity: 8,
       description: 'Transparent magnetic week planner to keep track of all your todos and reminders.',
@@ -85,7 +91,7 @@ const TraderDashboard: React.FC = () => {
     {
       id: '3',
       name: 'Pastel Exam Board',
-      category: 'exam boards',
+      category: 'Exam Boards',
       price: 210,
       quantity: 10,
       description: 'Adorable clipboards, featuring lovely illustrations in soft pastel colors. A perfect and playful accessory for school, home, or office use.',
@@ -94,7 +100,7 @@ const TraderDashboard: React.FC = () => {
     {
       id: '4',
       name: 'Pastel Exam Boards',
-      category: 'exam boards',
+      category: 'Exam Boards',
       price: 120,
       quantity: 15,
       description: 'Adorable clipboards in soft pastel colors. A perfect and playful accessory for school, home, or office use.',
@@ -106,17 +112,40 @@ const TraderDashboard: React.FC = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
-    category: '',
+    slug_id: '', // Changed from 'category' to 'slug_id' to match backend
     price: '',
     quantity: '',
     description: '',
     imageFile: null as File | null
   });
 
-  const categories = ['weekly planner', 'exam boards', 'notebooks', 'art supplies', 'crafts'];
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/category/getslugs`);
+        const data = await response.json();
+
+        if (data.success) {
+          setCategories(data.data);
+        } else {
+          console.error('Failed to fetch categories');
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -161,6 +190,7 @@ const TraderDashboard: React.FC = () => {
       }
 
       const data = await response.json();
+      console.log('Full Cloudinary Response:', data);
       return data.secure_url;
     } catch (error) {
       console.error('Cloudinary upload error:', error);
@@ -171,7 +201,7 @@ const TraderDashboard: React.FC = () => {
   const resetForm = () => {
     setFormData({
       name: '',
-      category: '',
+      slug_id: '',
       price: '',
       quantity: '',
       description: '',
@@ -181,33 +211,82 @@ const TraderDashboard: React.FC = () => {
   };
 
   const handleAddProduct = async () => {
-    if (!formData.name || !formData.category || !formData.price || !formData.quantity) {
+    // 1. Validation
+    if (!formData.name || !formData.slug_id || !formData.price || !formData.quantity) {
       alert('Please fill all required fields');
       return;
     }
 
-    let imageUrl = '/api/placeholder/300/400';
-    if (formData.imageFile) {
-      imageUrl = await uploadToCloudinary(formData.imageFile);
+    setIsSubmitting(true);
+
+    try {
+      // 2. Upload Image to Cloudinary
+      let imageUrl = '/api/placeholder/300/400';
+      if (formData.imageFile) {
+        imageUrl = await uploadToCloudinary(formData.imageFile);
+      }
+
+      // 3. Prepare payload for backend
+      const payload = {
+        product_name: formData.name,
+        slug_id: parseInt(formData.slug_id),
+        price: parseFloat(formData.price),
+        qty: parseInt(formData.quantity),
+        description: formData.description,
+        image_url: imageUrl,
+      };
+
+      console.log('Sending payload to backend:', payload);
+
+      // 4. Send data to backend API
+      const apiEndpoint = `${process.env.NEXT_PUBLIC_BACKEND}/product/add-product`;
+
+      const response = await fetch(apiEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Backend error response:', errorData);
+        throw new Error(errorData.message || `Failed to save product: ${response.statusText}`);
+      }
+
+      // 5. Get the saved product back from the DB
+      const savedProduct = await response.json();
+      console.log('Product saved successfully:', savedProduct);
+
+      // 6. Update local UI state with the confirmed data
+      const categoryName = categories.find(c => c.id === parseInt(formData.slug_id))?.slug_name || 'Unknown';
+
+      const newProductForUI: Product = {
+        id: savedProduct.product_id || Date.now().toString(),
+        name: savedProduct.data?.product_name || formData.name,
+        category: categoryName,
+        price: savedProduct.data?.price || parseFloat(formData.price),
+        quantity: savedProduct.data?.qty || parseInt(formData.quantity),
+        description: savedProduct.data?.description || formData.description,
+        imageUrl: savedProduct.data?.image_url || imageUrl,
+      };
+
+      setProducts(prev => [...prev, newProductForUI]);
+      setShowAddModal(false);
+      resetForm();
+
+    } catch (error) {
+      console.error('Failed to add product:', error);
+      alert(`Error: ${(error as Error).message}`);
+    } finally {
+      setIsSubmitting(false);
     }
-
-    const newProduct: Product = {
-      id: Date.now().toString(),
-      name: formData.name,
-      category: formData.category,
-      price: parseFloat(formData.price),
-      quantity: parseInt(formData.quantity),
-      description: formData.description,
-      imageUrl
-    };
-
-    setProducts(prev => [...prev, newProduct]);
-    setShowAddModal(false);
-    resetForm();
   };
 
   const handleEditProduct = async () => {
-    if (!selectedProduct || !formData.name || !formData.category || !formData.price || !formData.quantity) {
+    if (!selectedProduct || !formData.name || !formData.slug_id || !formData.price || !formData.quantity) {
       alert('Please fill all required fields');
       return;
     }
@@ -217,15 +296,20 @@ const TraderDashboard: React.FC = () => {
       imageUrl = await uploadToCloudinary(formData.imageFile);
     }
 
+    // Find the category NAME from the ID to display in the UI
+    const categoryName = categories.find(c => c.id === parseInt(formData.slug_id))?.slug_name || 'Unknown';
+
     const updatedProduct: Product = {
       ...selectedProduct,
       name: formData.name,
-      category: formData.category,
+      category: categoryName,
       price: parseFloat(formData.price),
       quantity: parseInt(formData.quantity),
       description: formData.description,
       imageUrl
     };
+
+    // TODO: Add your fetch() call here to update the backend
 
     setProducts(prev => prev.map(p => p.id === selectedProduct.id ? updatedProduct : p));
     setShowEditModal(false);
@@ -241,9 +325,15 @@ const TraderDashboard: React.FC = () => {
 
   const openEditModal = (product: Product) => {
     setSelectedProduct(product);
+
+    // Find the category ID that matches the product's category name
+    const currentSlugId = categories.find(
+      c => c.slug_name.toLowerCase() === product.category.toLowerCase()
+    )?.id.toString() || "";
+
     setFormData({
       name: product.name,
-      category: product.category,
+      slug_id: currentSlugId,
       price: product.price.toString(),
       quantity: product.quantity.toString(),
       description: product.description,
@@ -259,24 +349,18 @@ const TraderDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-40">
+      <header className="bg-white shadow-sm">
         <div className="container mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold text-gray-800">
               Trader Dashboard
             </h1>
             <div className="flex items-center gap-3">
-              <Link href="/productlist">
-                <button className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 transform hover:scale-105 shadow-lg">
-                  <Package size={20} />
-                  PRODUCT LIST
-                </button>
-              </Link>
               <button
                 onClick={openAddModal}
-                className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                className="flex items-center gap-2 bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-all duration-300 shadow-md"
               >
                 <PlusCircle size={20} />
                 ADD PRODUCT
@@ -292,7 +376,7 @@ const TraderDashboard: React.FC = () => {
           {products.map((product, index) => (
             <div
               key={product.id}
-              className="bg-white rounded-2xl shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl"
+              className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-all"
               style={{
                 animation: `fadeInUp 0.5s ease-out ${index * 0.1}s both`
               }}
@@ -311,7 +395,7 @@ const TraderDashboard: React.FC = () => {
                 <div className="flex-1 flex flex-col justify-between">
                   <div>
                     <h2 className="text-xl font-bold text-gray-800 mb-2">
-                      Product Name: <span className="text-gray-700">{product.name}</span>
+                      <span className="text-gray-700">{product.name}</span>
                     </h2>
                     <div className="flex gap-4 mb-3">
                       <p className="text-gray-600">
@@ -333,14 +417,14 @@ const TraderDashboard: React.FC = () => {
                   <div className="flex gap-3 mt-4">
                     <button
                       onClick={() => openEditModal(product)}
-                      className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 transform hover:scale-105 shadow-md"
+                      className="flex-1 flex items-center justify-center gap-2 bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md"
                     >
                       <Edit size={18} />
                       EDIT
                     </button>
                     <button
                       onClick={() => handleDeleteProduct(product.id)}
-                      className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-lg hover:from-red-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 shadow-md"
+                      className="flex-1 flex items-center justify-center gap-2 bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md"
                     >
                       <Trash2 size={18} />
                       DELETE
@@ -398,17 +482,29 @@ const TraderDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                <select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                >
-                  <option value="">Select Category</option>
-                  {categories.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
+                {/* Category Select - Updated to display slug_name along with child_category_name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Category
+                  </label>
+                  <select
+                    name="slug_id"
+                    value={formData.slug_id}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                  >
+                    <option value="">Select Category</option>
+                    {loading ? (
+                      <option value="" disabled>Loading categories...</option>
+                    ) : (
+                      categories.map((category) => (
+                        <option key={category.id} value={category.id}>
+                          {category.slug_name} - {category.child_category_name}
+                        </option>
+                      ))
+                    )}
+                  </select>
+                </div>
 
                 <input
                   type="text"
@@ -458,9 +554,10 @@ const TraderDashboard: React.FC = () => {
                   </button>
                   <button
                     onClick={handleAddProduct}
-                    className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                    className="flex-1 px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-all duration-300 transform hover:scale-105 shadow-lg disabled:opacity-50"
+                    disabled={isSubmitting}
                   >
-                    ADD
+                    {isSubmitting ? 'Adding...' : 'ADD'}
                   </button>
                 </div>
               </div>
@@ -515,6 +612,30 @@ const TraderDashboard: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Category Select - Updated to display slug_name along with child_category_name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Category
+                  </label>
+                  <select
+                    name="slug_id"
+                    value={formData.slug_id}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                  >
+                    <option value="">Select Category</option>
+                    {loading ? (
+                      <option value="" disabled>Loading categories...</option>
+                    ) : (
+                      categories.map((category) => (
+                        <option key={category.id} value={category.id}>
+                          {category.slug_name} - {category.child_category_name}
+                        </option>
+                      ))
+                    )}
+                  </select>
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
                   <input
@@ -566,13 +687,13 @@ const TraderDashboard: React.FC = () => {
                       setSelectedProduct(null);
                       resetForm();
                     }}
-                    className="flex-1 px-6 py-3 border-2 border-blue-500 text-blue-600 rounded-lg hover:bg-blue-50 transition-all duration-300"
+                    className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-300"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleEditProduct}
-                    className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                    className="flex-1 px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-all duration-300 transform hover:scale-105 shadow-lg"
                   >
                     UPDATE
                   </button>
