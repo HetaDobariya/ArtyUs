@@ -1,7 +1,7 @@
 "use client";
 
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { Key, useEffect, useState } from "react";
 import { useUser } from "../../../../contexts/UserContext"; 
 import Link from 'next/link';
 
@@ -55,6 +55,7 @@ const Package = ({ size = 24, className = "" }: { size?: number; className?: str
 );
 
 interface Product {
+  id: Key | null | undefined;
   _id?: string;
   slug_id?: string;
   name: string;
@@ -650,3 +651,7 @@ const TraderDashboard: React.FC = () => {
 };
 
 export default TraderDashboard;
+
+function useAuth(): { token: unknown; } {
+  throw new Error("Function not implemented.");
+}
