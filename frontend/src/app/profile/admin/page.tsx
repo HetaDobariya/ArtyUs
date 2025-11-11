@@ -1,4 +1,4 @@
-import AdminDashboard from "../modules/dashboard/user/AdminDashboard";
+import AdminDashboard from "../modules/dashboard/admin/AdminDashboard";
 
 export default function Admin() {
   return (
