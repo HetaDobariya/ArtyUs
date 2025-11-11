@@ -543,14 +543,14 @@ export default function Navigation() {
                         leaveFrom="opacity-100 translate-y-0"
                         leaveTo="opacity-0 translate-y-1"
                       >
-                        <Popover.Panel className="absolute right-0 z-10 mt-5 flex w-60 max-w-max px-4">
+                        <Popover.Panel className="absolute right-0 z-[9999] mt-5 flex w-60 max-w-max px-4">
                           {/* Click outside area */}
                           <div 
                             className="fixed inset-0" 
                             onClick={close}
                           />
-                          <div className="w-screen max-w-md flex-auto overflow-hidden rounded-3xl bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5 relative">
-                            <div className="p-4">
+                          <div className="relative z-[9999] w-screen max-w-md flex-auto overflow-hidden rounded-3xl bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5">
+                            <div className="p-4 ">
                               {/* User info in dropdown */}
                              
                               
