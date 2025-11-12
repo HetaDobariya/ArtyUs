@@ -389,7 +389,7 @@ export default function Navigation() {
                       {/* --- MODIFIED/ADDED --- */}
                       {/* Added Become a Service Provider Link */}
                       <Link
-                        href="/modules/auth/SPSignUp" // Assuming this path
+                        href="/modules/auth/ServiceProviderSignup" // Assuming this path
                         className="block text-sm font-medium text-gray-900 hover:text-indigo-600"
                         onClick={() => setOpen(false)}
                       >
@@ -620,7 +620,7 @@ export default function Navigation() {
                                   {/* Added Become a Service Provider Link */}
                                   <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
                                     <Link
-                                      href="/modules/auth/SPSignUp" // Assuming this path
+                                      href="/modules/auth/ServiceProviderSignup" // Assuming this path
                                       className="font-semibold text-gray-900"
                                       onClick={close}
                                     >
