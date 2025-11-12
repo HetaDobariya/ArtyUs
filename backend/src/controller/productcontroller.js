@@ -1,4 +1,4 @@
-import { addProductModel, getAllProductsModel, updateProductById, deleteProductById } from '../models/productmodel.js';
+import { addProductModel, getAllProductsModel, updateProductById, deleteProductById, getProductsByTraderIdModel } from '../models/productmodel.js';
 
 export const addProduct = async (req, res) => {
   try {
@@ -88,6 +88,29 @@ export const deleteProduct = async (req, res) => {
     res.status(200).json({ message: "Product deleted successfully" });
   } catch (error) {
     console.error("Error deleting product:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+export const getProductsByTraderId = async (req, res) => {
+  try {
+    // Get trader_id from token (or you can send it manually in query/body for now)
+    const trader_id = req.user?.trader?.trader_id;
+
+    if (!trader_id) {
+      return res.status(400).json({ error: "Trader ID not found in token or request" });
+    }
+
+    const products = await getProductsByTraderIdModel(trader_id);
+
+    res.status(200).json({
+      success: true,
+      count: products.length,
+      data: products,
+    });
+  } catch (error) {
+    console.error("Error fetching trader products:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };

@@ -59,3 +59,26 @@ export const deleteProductById = async (id) => {
   return result;
 };
 
+
+export const getProductsByTraderIdModel = async (trader_id) => {
+  const sql = `
+    SELECT 
+      p.id,
+      p.product_name,
+      p.qty,
+      p.price,
+      p.description,
+      p.image_url,
+      s.name AS slug_name,
+      c.name AS child_category_name,
+      t.shop_name AS trader_name
+    FROM product p
+    JOIN slug s ON p.slug_id = s.id
+    JOIN child_category c ON s.child_category_id = c.id
+    JOIN trader t ON p.trader_id = t.id
+    WHERE p.trader_id = ?
+    ORDER BY p.id DESC;
+  `;
+  const [rows] = await pool.query(sql, [trader_id]);
+  return rows;
+};
