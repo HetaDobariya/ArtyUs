@@ -928,13 +928,6 @@ const AdminDashboard: React.FC = () => {
                               <Eye size={18} />
                             </button>
                             <button
-                              onClick={() => openUpdateModal(user)}
-                              className="p-2 rounded-lg transition-all"
-                              style={{ color: '#8BBF9F', background: 'transparent' }}
-                            >
-                              <Edit size={18} />
-                            </button>
-                            <button
                               onClick={() => handleDeleteUser(user.id)}
                               className="p-2 rounded-lg transition-all"
                               style={{ color: '#ff6b6b', background: 'transparent' }}
@@ -998,13 +991,6 @@ const AdminDashboard: React.FC = () => {
                               style={{ color: '#6E9BBF' }}
                             >
                               <Eye size={18} />
-                            </button>
-                            <button
-                              onClick={() => openUpdateModal(trader)}
-                              className="p-2 rounded-lg transition-all"
-                              style={{ color: '#8BBF9F' }}
-                            >
-                              <Edit size={18} />
                             </button>
                             {!trader.is_verified && (
                               <button
@@ -1083,13 +1069,6 @@ const AdminDashboard: React.FC = () => {
                               style={{ color: '#6E9BBF' }}
                             >
                               <Eye size={18} />
-                            </button>
-                            <button
-                              onClick={() => openUpdateModal(provider)}
-                              className="p-2 rounded-lg transition-all"
-                              style={{ color: '#8BBF9F' }}
-                            >
-                              <Edit size={18} />
                             </button>
                             {!provider.is_verified && (
                               <button
@@ -1307,7 +1286,7 @@ const AdminDashboard: React.FC = () => {
                   // Trader update form
                   <>
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>Shop Name</label>
+                      <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}></label>
                       <input
                         type="text"
                         value={updateForm.shop_name || ''}
