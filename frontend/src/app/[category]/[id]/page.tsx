@@ -1,25 +1,41 @@
-'use client';
-
 import Image from 'next/image';
-import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { getProductById } from '@/data/products';
 
-export default function ProductDetailPage() {
-  const params = useParams();
-  const category = params.category as string;
-  const productId = parseInt(params.id as string);
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-  // Get product from centralized data
-  const product = getProductById(productId);
+async function getProduct(productId: string) {
+  try {
+    const response = await fetch(`${API_URL}/api/products/${productId}`, {
+      cache: 'no-store', // Always fetch fresh data
+    });
+    
+    if (!response.ok) {
+      return null;
+    }
+    
+    const result = await response.json();
+    return result.success ? result.data : null;
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    return null;
+  }
+}
 
-  // If product doesn't exist, show not found
+export default async function ProductDetailPage({
+  params,
+}: {
+  params: Promise<{ category: string; id: string }>;
+}) {
+  const { category, id } = await params;
+  const product = await getProduct(id);
+
+  // Error state
   if (!product) {
     return (
       <div className="bg-white min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Product Not Found</h1>
-          <p className="text-gray-600 mb-4">The product you're looking for doesn't exist.</p>
+          <p className="text-gray-600 mb-4">The product you&apos;re looking for doesn&apos;t exist.</p>
           <Link href={`/${category}`} className="text-blue-600 hover:underline">
             ← Back to {category.replace(/-/g, ' ')}
           </Link>

@@ -8,9 +8,9 @@ const LINKS = [
     title: 'Products',
     items: [
       { title: 'acrylic colors', link: '/acrylic-colors' },
-      { title: 'stationery kits', link: '/stationery-kits' },
+      { title: 'stationary kits', link: '/stationary-kits' },
       { title: 'vintage diaries', link: '/vintage-diaries' },
-      { title: 'customized planners', link: '/customized-planner' },
+      { title: 'customized planner', link: '/customized-planner' },
       { title: 'desk supplies', link: '/desk-supplies' },
     ],
   },
