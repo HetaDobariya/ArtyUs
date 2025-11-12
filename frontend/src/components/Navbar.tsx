@@ -11,11 +11,84 @@ import logo from '../../public/Arty-US_logo.png';
 import { Fragment, useState, useEffect } from 'react';
 import { useUser } from '@/contexts/UserContext';
 
-interface ApiCategory {
-  id: number;
-  name: string;
-  created_at: string;
-}
+const navigation = {
+  categories: [
+    {
+      id: 'Stationery Supplies',
+      name: 'Stationery Supplies',
+      featured: [
+        {
+          name: 'Stationery Essentials1',
+          href: '#',
+          imageSrc: '/image/navbarImages/schoolsupplies1.jpg',
+          imageAlt: 'Stationery Image',
+        },
+        {
+          name: 'Stationery Essentials2',
+          href: '#',
+          imageSrc: '/image/navbarImages/schoolsupplies2.jpg',
+          imageAlt: 'Stationery Image.',
+        },
+      ],
+      sections: [
+        {
+          id: 'StationeryBasics',
+          name: 'Stationery Basics',
+          items: [
+            { name: 'Pencil' },
+            { name: 'Pens' },
+            { name: 'Sharpeners' },
+            { name: 'Erasers' },
+            { name: 'Geometric Tools' },
+            { name: 'Exam Boards' },
+            { name: 'Glue and Adhesives' },
+            { name: 'Desk Supplies' },
+          ],
+        },
+        {
+          id: 'Artsupplies',
+          name: 'Art Supplies',
+          items: [
+            { name: 'Color Pencils' },
+            { name: 'Water Colors' },
+            { name: 'Crayon Colors' },
+            { name: 'Poster Colors' },
+            { name: 'Sketch Pens' },
+            { name: 'Markers and Highlighters' },
+            { name: 'Color Palette' },
+            { name: 'Paint Brushes' },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'art&craft',
+      name: 'Art & Craft',
+      featured: [
+        {
+          name: 'Art Essentials1',
+          href: '#',
+          imageSrc: '/image/navbarImages/artandcraft1.jpg',
+          imageAlt: 'Art Essentials',
+        },
+        {
+          name: 'Art Essentials2',
+          href: '#',
+          imageSrc: '/image/navbarImages/artandcraft2.jpg',
+          imageAlt: 'Art Essentials',
+        },
+      ],
+      sections: [
+        {
+          id: 'ArtPaints',
+          name: 'Art Paints',
+          items: [
+            { name: 'Acrylic Colors' },
+            { name: 'Fabric Colors' },
+            { name: 'Oil Colors' },
+            { name: 'Spray Paints' },
+          ],
+        },
 
 interface ApiChildCategory {
   id: number;
@@ -24,40 +97,74 @@ interface ApiChildCategory {
   created_at: string;
 }
 
-interface ApiSlug {
-  id: number;
-  slug_name: string;
-  child_category_name: string;
-}
-
-interface UiItem {
-  name: string;
-  href: string;
-}
-
-interface UiSection {
-  id: string;
-  name: string;
-  items: UiItem[];
-}
-
-interface UiFeatured {
-  name: string;
-  href: string;
-  imageSrc: string;
-  imageAlt: string;
-}
-
-interface UiCategory {
-  id: string | number;
-  name: string;
-  featured: UiFeatured[];
-  sections: UiSection[];
-}
-
-interface NavigationData {
-  categories: UiCategory[];
-}
+    {
+      id: 'Planners',
+      name: 'Planners',
+      featured: [
+        {
+          name: 'Meetings Planner',
+          href: '#',
+          imageSrc: '/image/navbarImages/planner.jpg',
+          imageAlt: 'Meetings Planner',
+        },
+        {
+          name: 'Everyday Journal',
+          href: '#',
+          imageSrc: '/image/navbarImages/journal.jpg',
+          imageAlt: 'Everyday Journal',
+        },
+      ],
+      sections: [
+        {
+          id: 'Planners',
+          name: 'Planners and Journals',
+          items: [
+            { name: 'Daily Planner' },
+            { name: 'Weekly Planner' },
+            { name: 'Monthly Planner' },
+            { name: 'Customized Planner' },
+            { name: 'Journals' },
+          ],
+        },
+        {
+          id: 'Diaries',
+          name: 'Diaries',
+          items: [
+            { name: 'Simple Diaries' },
+            { name: 'Vintage Diaries' },
+            { name: 'Little Diaries' },
+            { name: 'Sticky Notes' },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'Kits and hampers',
+      name: 'Kits and hampers',
+      featured: [
+        {
+          name: 'Stationery Hamper',
+          href: '#',
+          imageSrc: '/image/navbarImages/hamper1.webp',
+          imageAlt: 'Stationery Hamper',
+        },
+        {
+          name: 'Art-and-Craft Hamper',
+          href: '#',
+          imageSrc: '/image/navbarImages/hamper2.jpg',
+          imageAlt: 'Art & Craft Hamper',
+        },
+      ],
+      sections: [
+        {
+          id: 'essential kits',
+          name: 'Essential Kits',
+          items: [{ name: 'Stationary Kits' }, { name: 'Art-and-Craft Kits' }],
+        },
+      ],
+    },
+  ],
+};
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');

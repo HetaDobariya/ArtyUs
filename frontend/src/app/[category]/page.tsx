@@ -1,24 +1,41 @@
-'use client';
-
 import Image from 'next/image';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { getCategoryData } from '@/data/products';
 
-export default function CategoryPage() {
-  const params = useParams();
-  const category = params.category as string;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-  // Get category data from centralized data file
-  const data = getCategoryData(category);
+async function getCategoryData(category: string) {
+  try {
+    const response = await fetch(`${API_URL}/api/products/category/${category}`, {
+      cache: 'no-store', // Always fetch fresh data
+    });
+    
+    if (!response.ok) {
+      return null;
+    }
+    
+    const result = await response.json();
+    return result.success ? result.data : null;
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    return null;
+  }
+}
 
-  // If category doesn't exist, show not found
+export default async function CategoryPage({
+  params,
+}: {
+  params: Promise<{ category: string }>;
+}) {
+  const { category } = await params;
+  const data = await getCategoryData(category);
+
+  // Error state
   if (!data) {
     return (
       <div className="bg-white min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Category Not Found</h1>
-          <p className="text-gray-600">The category you're looking for doesn't exist.</p>
+          <p className="text-gray-600">The category you&apos;re looking for doesn&apos;t exist.</p>
           <Link href="/" className="text-blue-600 hover:underline mt-4 inline-block">
             Go back home
           </Link>
