@@ -6,12 +6,12 @@ export const findUserByEmail = async (email) => {
   return rows[0];
 };
 
-export const createUser = async ({ name,email, address, password, contactNumber }) => {
+export const createUser = async ({ name, email, address, password, contactNumber }) => {
   const sql = `
-    INSERT INTO user (name, email,address, password, contact, is_trader, is_admin, created_at, update_at, is_verified)
-    VALUES (?, ?, ?, ?, ?, 1, 0, NOW(), NOW(), 0)
+    INSERT INTO user (name, email, address, password, contact, is_trader, is_serviceprovider, is_admin, created_at, update_at, is_verified)
+    VALUES (?, ?, ?, ?, ?, 1, 0, 0, NOW(), NOW(), 0)
   `;
-  const [result] = await pool.query(sql, [name, email,address, password, contactNumber]);
+  const [result] = await pool.query(sql, [name, email, address, password, contactNumber]);
   return result.insertId;
 };
 
