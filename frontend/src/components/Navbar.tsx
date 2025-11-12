@@ -33,14 +33,14 @@ const navigation = {
           id: 'StationeryBasics',
           name: 'Stationery Basics',
           items: [
-            { name: 'Pencils' },
+            { name: 'Pencil' },
             { name: 'Pens' },
             { name: 'Sharpeners' },
             { name: 'Erasers' },
             { name: 'Geometric Tools' },
             { name: 'Exam Boards' },
             { name: 'Glue and Adhesives' },
-            { name: 'Desk supplies' },
+            { name: 'Desk Supplies' },
           ],
         },
         {
@@ -162,7 +162,7 @@ const navigation = {
         {
           id: 'essential kits',
           name: 'Essential Kits',
-          items: [{ name: 'Stationery Kits' }, { name: 'Art-and-Craft Kits' }],
+          items: [{ name: 'Stationary Kits' }, { name: 'Art-and-Craft Kits' }],
         },
       ],
     },
