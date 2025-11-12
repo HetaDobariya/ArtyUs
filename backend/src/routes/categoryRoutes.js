@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/getCategory',verifyToken,category);
 router.get('/getChildCategory',verifyToken,childCategory);
 
-router.get('/getslugs',slugs);
+router.get('/getslugs',verifyToken,slugs);
 router.put("/slug/update/:id", verifyToken, updateSlug);
 router.delete("/slug/delete/:id", verifyToken, deleteSlug);
 

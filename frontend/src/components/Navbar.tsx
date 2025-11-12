@@ -115,7 +115,7 @@ export default function Navigation() {
 
             const items: UiItem[] = slugsForThisChild.map(slug => ({
               name: slug.slug_name,
-              href: `/products?category=${slug.slug_name}`
+              href:`/products?category=${slug.slug_name}`
             }));
 
             return {
@@ -160,12 +160,15 @@ export default function Navigation() {
     }
   };
 
+  // --- MODIFIED/ADDED ---
+  // Updated to include 'service_provider'
   const getUserIcon = () =>
-    user?.role === 'trader' ? (
+    user?.role === 'trader' || user?.role === 'service_provider' ? (
       <BusinessIcon className="h-5 w-5" />
     ) : (
       <PersonOutlineIcon className="h-5 w-5" />
     );
+  // --- END MODIFICATION ---
 
   const getUserDisplayName = () => {
     if (loading) return 'Loading...';
@@ -327,6 +330,19 @@ export default function Navigation() {
                 <div className="mt-auto px-4 py-6 space-y-3">
                   {user ? (
                     <>
+                      {/* --- MODIFIED/ADDED --- */}
+                      {/* Added Service Provider Profile Link */}
+                      {user.role === 'service_provider' && (
+                        <Link
+                          href="/service-provider/profile" // Assuming this path
+                          className="block text-sm font-medium text-gray-900 hover:text-indigo-600"
+                          onClick={() => setOpen(false)}
+                        >
+                          Service Provider Profile
+                        </Link>
+                      )}
+                      {/* --- END MODIFICATION --- */}
+                      
                       {user.role === 'trader' && (
                         <Link
                           href="/trader/profile"
@@ -369,6 +385,17 @@ export default function Navigation() {
                       >
                         Become a Trader
                       </Link>
+                      
+                      {/* --- MODIFIED/ADDED --- */}
+                      {/* Added Become a Service Provider Link */}
+                      <Link
+                        href="/modules/auth/SPSignUp" // Assuming this path
+                        className="block text-sm font-medium text-gray-900 hover:text-indigo-600"
+                        onClick={() => setOpen(false)}
+                      >
+                        Become a Service Provider
+                      </Link>
+                      {/* --- END MODIFICATION --- */}
                     </>
                   )}
                 </div>
@@ -430,7 +457,7 @@ export default function Navigation() {
                             leaveFrom="opacity-100"
                             leaveTo="opacity-0"
                           >
-                            <Popover.Panel className="absolute inset-x-0 top-16 text-sm text-gray-500 z-50">
+                           <Popover.Panel className="absolute inset-x-0 top-16 text-sm text-gray-500 z-[100]">
                               <div
                                 className="fixed inset-0 top-16"
                                 onClick={close}
@@ -506,19 +533,31 @@ export default function Navigation() {
                         leaveFrom="opacity-100 translate-y-0"
                         leaveTo="opacity-0 translate-y-1"
                       >
-                        <Popover.Panel className="absolute right-0 z-[9999] mt-5 flex w-60 max-w-max px-4">
-                          {/* Click outside area */}
-                          <div 
-                            className="fixed inset-0" 
+                        <Popover.Panel className="absolute right-0 z-[100] mt-5 flex w-60 max-w-max px-4">
+                          <div
+                            className="fixed inset-0"
                             onClick={close}
                           />
-                          <div className="relative z-[9999] w-screen max-w-md flex-auto overflow-hidden rounded-3xl bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5">
-                            <div className="p-4 ">
-                              {/* User info in dropdown */}
-                             
-                              
+                          <div className="w-screen max-w-md flex-auto overflow-hidden rounded-3xl bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5 relative">
+                            <div className="p-4">
                               {user ? (
                                 <>
+                                  {/* --- MODIFIED/ADDED --- */}
+                                  {/* Added Service Provider Profile Link */}
+                                  {user.role === 'service_provider' && (
+                                    <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
+                                      <Link
+                                        href="/profile/service-provider" // Assuming this path
+                                        className="font-semibold text-gray-900 flex items-center gap-2"
+                                        onClick={close}
+                                      >
+                                        <BusinessIcon className="h-4 w-4" />
+                                        Service Provider Profile
+                                      </Link>
+                                    </div>
+                                  )}
+                                  {/* --- END MODIFICATION --- */}
+
                                   {user.role === 'trader' && (
                                     <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
                                       <Link
@@ -576,6 +615,19 @@ export default function Navigation() {
                                       Become a Trader
                                     </Link>
                                   </div>
+                                  
+                                  {/* --- MODIFIED/ADDED --- */}
+                                  {/* Added Become a Service Provider Link */}
+                                  <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
+                                    <Link
+                                      href="/modules/auth/SPSignUp" // Assuming this path
+                                      className="font-semibold text-gray-900"
+                                      onClick={close}
+                                    >
+                                      Become a Service Provider
+                                    </Link>
+                                  </div>
+                                  {/* --- END MODIFICATION --- */}
                                 </>
                               )}
                             </div>
