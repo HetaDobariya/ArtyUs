@@ -102,15 +102,22 @@ const UserCheck = ({ size = 24, className = "" }: { size?: number; className?: s
   </svg>
 );
 
+const Tools = ({ size = 24, className = "" }: { size?: number; className?: string }) => (
+  <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+  </svg>
+);
+
 interface User {
   id: string;
   name: string;
   email: string;
   address: string;
   is_trader: number;
+  is_serviceprovider: number;
   is_verified: number;
   joinedDate?: string;
-  role?: 'user' | 'trader';
+  role?: 'user' | 'trader' | 'serviceprovider';
   status?: 'active' | 'inactive';
 }
 
@@ -128,6 +135,21 @@ interface Trader {
   description: string;
 }
 
+interface ServiceProvider {
+  user_id: string;
+  user_name: string;
+  email: string;
+  user_address: string;
+  user_contact: string;
+  is_verified: number;
+  service_provider_id: string;
+  service_name: string;
+  shop_name: string;
+  service_address: string;
+  description: string;
+  contact: string;
+}
+
 interface UnverifiedTrader {
   user_id: string;
   user_name: string;
@@ -135,6 +157,19 @@ interface UnverifiedTrader {
   contact: string;
   address: string;
   trader_id: string;
+  shop_name: string;
+  description: string;
+  created_at: string;
+}
+
+interface UnverifiedServiceProvider {
+  user_id: string;
+  user_name: string;
+  email: string;
+  contact: string;
+  address: string;
+  service_provider_id: string;
+  service_name: string;
   shop_name: string;
   description: string;
   created_at: string;
@@ -167,7 +202,7 @@ interface Slug {
 }
 
 const AdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'traders' | 'products' | 'categories'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'traders' | 'serviceproviders' | 'products' | 'categories'>('overview');
   const [searchQuery, setSearchQuery] = useState('');
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -181,21 +216,22 @@ const AdminDashboard: React.FC = () => {
   // Dynamic data states
   const [users, setUsers] = useState<User[]>([]);
   const [traders, setTraders] = useState<Trader[]>([]);
+  const [serviceProviders, setServiceProviders] = useState<ServiceProvider[]>([]);
   const [unverifiedTraders, setUnverifiedTraders] = useState<UnverifiedTrader[]>([]);
+  const [unverifiedServiceProviders, setUnverifiedServiceProviders] = useState<UnverifiedServiceProvider[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [slugs, setSlugs] = useState<Slug[]>([]);
 
   // Combined traders list (verified + unverified)
   const allTraders = useMemo(() => {
-    // Convert unverified traders to match the Trader interface
     const convertedUnverifiedTraders: Trader[] = unverifiedTraders.map(trader => ({
       user_id: trader.user_id,
       user_name: trader.user_name,
       email: trader.email,
       user_address: trader.address,
       user_contact: trader.contact,
-      is_verified: 0, // Unverified
+      is_verified: 0,
       trader_id: trader.trader_id,
       shop_name: trader.shop_name,
       shop_address: trader.address,
@@ -206,6 +242,26 @@ const AdminDashboard: React.FC = () => {
     return [...traders, ...convertedUnverifiedTraders];
   }, [traders, unverifiedTraders]);
 
+  // Combined service providers list (verified + unverified)
+  const allServiceProviders = useMemo(() => {
+  const convertedUnverifiedServiceProviders: ServiceProvider[] = unverifiedServiceProviders.map(provider => ({
+    user_id: provider.user_id,
+    user_name: provider.user_name,
+    email: provider.email,
+    user_address: provider.address,
+    user_contact: provider.contact,
+    is_verified: 0,
+    service_provider_id: provider.service_provider_id,
+    service_name: provider.service_name,
+    shop_name: provider.shop_name,
+    service_address: provider.address,
+    description: provider.description,
+    contact: provider.contact
+  }));
+
+  return [...serviceProviders, ...convertedUnverifiedServiceProviders];
+}, [serviceProviders, unverifiedServiceProviders]);
+
   // Fetch all data on component mount
   useEffect(() => {
     const fetchAllData = async () => {
@@ -214,7 +270,9 @@ const AdminDashboard: React.FC = () => {
         await Promise.all([
           fetchUsers(),
           fetchTraders(),
+          fetchServiceProviders(),
           fetchUnverifiedTraders(),
+          
           fetchProducts(),
           fetchSlugs(),
           fetchCategories()
@@ -245,8 +303,9 @@ const AdminDashboard: React.FC = () => {
             email: user.email,
             address: user.address,
             is_trader: user.is_trader,
+            is_serviceprovider: user.is_serviceprovider,
             is_verified: user.is_verified,
-            role: user.is_trader ? 'trader' : 'user',
+            role: user.is_serviceprovider ? 'serviceprovider' : user.is_trader ? 'trader' : 'user',
             status: 'active'
           }));
           setUsers(usersData);
@@ -274,6 +333,23 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const fetchServiceProviders = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/admin/serviceprovider-details`, {
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setServiceProviders(data.data || []);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching service providers:", error);
+    }
+  };
+
   const fetchUnverifiedTraders = async () => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/trader/trader-details/unverified`, {
@@ -288,6 +364,23 @@ const AdminDashboard: React.FC = () => {
       }
     } catch (error) {
       console.error("Error fetching unverified traders:", error);
+    }
+  };
+
+  const fetchUnverifiedServiceProviders = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/serviceprovider/service-details/unverified`, {
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setUnverifiedServiceProviders(data.data || []);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching unverified service providers:", error);
     }
   };
 
@@ -319,7 +412,6 @@ const AdminDashboard: React.FC = () => {
         if (data.success) {
           setSlugs(data.data || []);
           
-          // Transform slugs to categories for display
           const categoriesData: Category[] = data.data.map((slug: Slug) => ({
             id: slug.id.toString(),
             name: slug.child_category_name,
@@ -366,11 +458,12 @@ const AdminDashboard: React.FC = () => {
 
   // Stats - Updated to use dynamic data
   const stats = {
-    totalUsers: users.length,
-    totalTraders: allTraders.length,
-    totalProducts: products.length,
-    totalCategories: categories.length,
-  };
+  totalUsers: users.length,
+  totalTraders: allTraders.length,
+  totalServiceProviders: serviceProviders.length, // Changed from allServiceProviders to serviceProviders
+  totalProducts: products.length,
+  totalCategories: categories.length,
+};
 
   // Filtered Data
   const filteredUsers = useMemo(() =>
@@ -382,6 +475,11 @@ const AdminDashboard: React.FC = () => {
     allTraders.filter(t => t.user_name.toLowerCase().includes(searchQuery.toLowerCase()) || t.email.toLowerCase().includes(searchQuery.toLowerCase())),
     [allTraders, searchQuery]
   );
+
+ const filteredServiceProviders = useMemo(() =>
+  serviceProviders.filter(s => s.user_name.toLowerCase().includes(searchQuery.toLowerCase()) || s.email.toLowerCase().includes(searchQuery.toLowerCase())),
+  [serviceProviders, searchQuery]
+);
 
   const filteredProducts = useMemo(() =>
     products.filter(p => p.product_name.toLowerCase().includes(searchQuery.toLowerCase()) || p.trader_name.toLowerCase().includes(searchQuery.toLowerCase())),
@@ -437,6 +535,28 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const handleDeleteServiceProvider = async (id: string) => {
+    if (confirm('Are you sure you want to delete this service provider?')) {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/admin/serviceprovider-details/delete/${id}`, {
+          method: 'DELETE',
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          setServiceProviders(prev => prev.filter(s => s.service_provider_id !== id));
+          setUnverifiedServiceProviders(prev => prev.filter(s => s.service_provider_id !== id));
+          alert('Service Provider deleted successfully');
+        } else {
+          alert('Failed to delete service provider');
+        }
+      } catch (error) {
+        console.error("Error deleting service provider:", error);
+        alert('Error deleting service provider');
+      }
+    }
+  };
+
   const handleVerifyTrader = async (userId: string) => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/trader/trader-details/verify/${userId}`, {
@@ -445,9 +565,8 @@ const AdminDashboard: React.FC = () => {
       });
       
       if (response.ok) {
-        // Remove from unverified list and refresh traders
         setUnverifiedTraders(prev => prev.filter(t => t.user_id !== userId));
-        await fetchTraders(); // Refresh verified traders list
+        await fetchTraders();
         alert('Trader verified successfully');
       } else {
         alert('Failed to verify trader');
@@ -455,6 +574,26 @@ const AdminDashboard: React.FC = () => {
     } catch (error) {
       console.error("Error verifying trader:", error);
       alert('Error verifying trader');
+    }
+  };
+
+  const handleVerifyServiceProvider = async (userId: string) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/serviceprovider/service-details/verify/${userId}`, {
+        method: 'PUT',
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        setUnverifiedServiceProviders(prev => prev.filter(s => s.user_id !== userId));
+        await fetchServiceProviders();
+        alert('Service Provider verified successfully');
+      } else {
+        alert('Failed to verify service provider');
+      }
+    } catch (error) {
+      console.error("Error verifying service provider:", error);
+      alert('Error verifying service provider');
     }
   };
 
@@ -483,6 +622,7 @@ const AdminDashboard: React.FC = () => {
     try {
       let response;
       const entityType = selectedEntity?.trader_id ? 'trader' : 
+                        selectedEntity?.service_provider_id ? 'serviceprovider' :
                         selectedEntity?.product_name ? 'product' : 'user';
       
       if (entityType === 'user') {
@@ -503,8 +643,16 @@ const AdminDashboard: React.FC = () => {
           credentials: 'include',
           body: JSON.stringify(updateForm)
         });
+      } else if (entityType === 'serviceprovider') {
+        response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/admin/serviceprovider-details/update/${selectedEntity.service_provider_id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify(updateForm)
+        });
       } else if (entityType === 'product') {
-        // For products, only send qty and price (removed description)
         const { qty, price } = updateForm;
         response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/product/update/${selectedEntity.id}`, {
           method: 'PUT',
@@ -517,9 +665,9 @@ const AdminDashboard: React.FC = () => {
       }
 
       if (response?.ok) {
-        // Refresh data
         if (entityType === 'user') await fetchUsers();
         if (entityType === 'trader') await fetchTraders();
+        if (entityType === 'serviceprovider') await fetchServiceProviders();
         if (entityType === 'product') await fetchProducts();
         
         setShowUpdateModal(false);
@@ -530,8 +678,8 @@ const AdminDashboard: React.FC = () => {
         alert(`Failed to update ${entityType}`);
       }
     } catch (error) {
-      console.error(`Error updating ${selectedEntity?.trader_id ? 'trader' : 'user'}:`, error);
-      alert(`Error updating ${selectedEntity?.trader_id ? 'trader' : 'user'}`);
+      console.error(`Error updating entity:`, error);
+      alert(`Error updating entity`);
     }
   };
 
@@ -564,7 +712,6 @@ const AdminDashboard: React.FC = () => {
 
       alert('Category added successfully!');
       
-      // Refresh slugs data
       await fetchSlugs();
       
       setCategoryForm({ name: '', slug: '' });
@@ -579,7 +726,6 @@ const AdminDashboard: React.FC = () => {
   const handleDeleteCategory = async (id: string) => {
     if (confirm('Are you sure you want to delete this category?')) {
       try {
-        // Add your delete API call here when available
         setCategories(prev => prev.filter(c => c.id !== id));
         alert('Category deleted successfully');
       } catch (error) {
@@ -626,7 +772,7 @@ const AdminDashboard: React.FC = () => {
       <div className="container mx-auto px-6 py-8">
         {/* Stats Overview */}
         {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div className="bg-white rounded-2xl shadow-lg p-6 transform transition-all hover:scale-105"
               style={{ border: '1px solid transparent', boxShadow: '0 6px 18px rgba(20,20,30,0.04)' }}>
               <div className="flex items-center justify-between">
@@ -657,11 +803,24 @@ const AdminDashboard: React.FC = () => {
               style={{ border: '1px solid transparent', boxShadow: '0 6px 18px rgba(20,20,30,0.04)' }}>
               <div className="flex items-center justify-between">
                 <div>
+                  <p className="text-[#4b5563] text-sm font-medium">Service Providers</p>
+                  <p className="text-3xl font-bold" style={{ color: '#1f2937' }}>{stats.totalServiceProviders}</p>
+                </div>
+                <div className="p-4 rounded-full" style={{ background: '#F7F3E8' }}>
+                  <Tools className="text-[#A8E6CF]" size={32} />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-lg p-6 transform transition-all hover:scale-105"
+              style={{ border: '1px solid transparent', boxShadow: '0 6px 18px rgba(20,20,30,0.04)' }}>
+              <div className="flex items-center justify-between">
+                <div>
                   <p className="text-[#4b5563] text-sm font-medium">Total Products</p>
                   <p className="text-3xl font-bold" style={{ color: '#1f2937' }}>{stats.totalProducts}</p>
                 </div>
-                <div className="p-4 rounded-full" style={{ background: '#F7F3E8' }}>
-                  <Package className="text-[#A8E6CF]" size={32} />
+                <div className="p-4 rounded-full" style={{ background: '#EAF6ED' }}>
+                  <Package className="text-[#8BBF9F]" size={32} />
                 </div>
               </div>
             </div>
@@ -671,7 +830,7 @@ const AdminDashboard: React.FC = () => {
         {/* Tabs */}
         <div className="bg-white rounded-2xl shadow-lg p-2 mb-6" style={{ border: '1px solid #F3E9FF' }}>
           <div className="flex flex-wrap gap-2">
-            {['overview', 'users', 'traders', 'products', 'categories'].map((tab) => (
+            {['overview', 'users', 'traders', 'serviceproviders', 'products', 'categories'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab as any)}
@@ -682,7 +841,7 @@ const AdminDashboard: React.FC = () => {
                     : { color: '#374151', background: 'transparent' }
                 }
               >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {tab.charAt(0).toUpperCase() + tab.slice(1).replace('serviceproviders', 'Service Providers')}
               </button>
             ))}
           </div>
@@ -696,7 +855,7 @@ const AdminDashboard: React.FC = () => {
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2" size={20} />
                 <input
                   type="text"
-                  placeholder={`Search ${activeTab}...`}
+                  placeholder={`Search ${activeTab === 'serviceproviders' ? 'service providers' : activeTab}...`}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-12 pr-4 py-3 rounded-lg transition-all"
@@ -753,10 +912,10 @@ const AdminDashboard: React.FC = () => {
                             padding: '6px 12px',
                             borderRadius: 999,
                             fontSize: 12,
-                            background: user.is_trader ? '#EAF6ED' : '#F3F4F6',
-                            color: user.is_trader ? '#1f7a3a' : '#6b7280'
+                            background: user.is_serviceprovider ? '#EAF6ED' : user.is_trader ? '#FDEBEC' : '#F3F4F6',
+                            color: user.is_serviceprovider ? '#1f7a3a' : user.is_trader ? '#dc2626' : '#6b7280'
                           }}>
-                            {user.is_trader ? 'Trader' : 'User'}
+                            {user.is_serviceprovider ? 'Service Provider' : user.is_trader ? 'Trader' : 'User'}
                           </span>
                         </td>
                         <td className="px-6 py-4">
@@ -767,13 +926,6 @@ const AdminDashboard: React.FC = () => {
                               style={{ color: '#6E9BBF', background: 'transparent' }}
                             >
                               <Eye size={18} />
-                            </button>
-                            <button
-                              onClick={() => openUpdateModal(user)}
-                              className="p-2 rounded-lg transition-all"
-                              style={{ color: '#8BBF9F', background: 'transparent' }}
-                            >
-                              <Edit size={18} />
                             </button>
                             <button
                               onClick={() => handleDeleteUser(user.id)}
@@ -840,13 +992,6 @@ const AdminDashboard: React.FC = () => {
                             >
                               <Eye size={18} />
                             </button>
-                            <button
-                              onClick={() => openUpdateModal(trader)}
-                              className="p-2 rounded-lg transition-all"
-                              style={{ color: '#8BBF9F' }}
-                            >
-                              <Edit size={18} />
-                            </button>
                             {!trader.is_verified && (
                               <button
                                 onClick={() => handleVerifyTrader(trader.user_id)}
@@ -858,6 +1003,84 @@ const AdminDashboard: React.FC = () => {
                             )}
                             <button
                               onClick={() => handleDeleteTrader(trader.trader_id)}
+                              className="p-2 rounded-lg transition-all"
+                              style={{ color: '#ff6b6b' }}
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Service Providers Tab (Combined Verified + Unverified) */}
+        {activeTab === 'serviceproviders' && (
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden" style={{ border: '1px solid #F3E9FF' }}>
+            {filteredServiceProviders.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                No service providers found
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead style={{ background: '#FDEBEC', color: '#1F2937' }}>
+                    <tr>
+                      <th className="px-6 py-4 text-left">Provider Name</th>
+                      <th className="px-6 py-4 text-left">Email</th>
+                      <th className="px-6 py-4 text-left">Shop Name</th>
+                      <th className="px-6 py-4 text-left">Services</th>
+                      <th className="px-6 py-4 text-left">Status</th>
+                      <th className="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredServiceProviders.map((provider) => (
+                      <tr key={provider.service_provider_id} className="border-b hover:bg-white/60">
+                        <td className="px-6 py-4 font-medium" style={{ color: '#1f2937' }}>{provider.user_name}</td>
+                        <td className="px-6 py-4" style={{ color: '#4b5563' }}>{provider.email}</td>
+                        <td className="px-6 py-4" style={{ color: '#4b5563' }}>{provider.shop_name}</td>
+                        <td className="px-6 py-4" style={{ color: '#4b5563' }}>
+                          <span className="text-sm bg-gray-100 px-2 py-1 rounded">
+                            {provider.service_name}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          {provider.is_verified ? (
+                            <span className="flex items-center gap-1" style={{ color: '#8BBF9F' }}>
+                              <CheckCircle size={18} /> Verified
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1" style={{ color: '#F59E0B' }}>
+                              <XCircle size={18} /> Unverified
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => viewDetails(provider)}
+                              className="p-2 rounded-lg transition-all"
+                              style={{ color: '#6E9BBF' }}
+                            >
+                              <Eye size={18} />
+                            </button>
+                            {!provider.is_verified && (
+                              <button
+                                onClick={() => handleVerifyServiceProvider(provider.user_id)}
+                                className="p-2 rounded-lg transition-all"
+                                style={{ color: '#8BBF9F' }}
+                              >
+                                <UserCheck size={18} />
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleDeleteServiceProvider(provider.service_provider_id)}
                               className="p-2 rounded-lg transition-all"
                               style={{ color: '#ff6b6b' }}
                             >
@@ -1045,7 +1268,11 @@ const AdminDashboard: React.FC = () => {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md" style={{ border: '1px solid #F3E9FF' }}>
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold" style={{ color: '#1f2937' }}>Update {selectedEntity.trader_id ? 'Trader' : selectedEntity.product_name ? 'Product' : 'User'}</h2>
+                <h2 className="text-2xl font-bold" style={{ color: '#1f2937' }}>
+                  Update {selectedEntity.trader_id ? 'Trader' : 
+                         selectedEntity.service_provider_id ? 'Service Provider' : 
+                         selectedEntity.product_name ? 'Product' : 'User'}
+                </h2>
                 <button
                   onClick={() => setShowUpdateModal(false)}
                   className="text-[#6b7280] hover:text-[#374151]"
@@ -1059,7 +1286,7 @@ const AdminDashboard: React.FC = () => {
                   // Trader update form
                   <>
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>Shop Name</label>
+                      <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}></label>
                       <input
                         type="text"
                         value={updateForm.shop_name || ''}
@@ -1074,6 +1301,50 @@ const AdminDashboard: React.FC = () => {
                         type="text"
                         value={updateForm.shop_contact || ''}
                         onChange={(e) => setUpdateForm({ ...updateForm, shop_contact: e.target.value })}
+                        className="w-full px-4 py-3 rounded-lg transition-all"
+                        style={{ border: '1px solid #E9EEF6', outline: 'none', color: '#0f172a' }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>Description</label>
+                      <textarea
+                        value={updateForm.description || ''}
+                        onChange={(e) => setUpdateForm({ ...updateForm, description: e.target.value })}
+                        className="w-full px-4 py-3 rounded-lg transition-all"
+                        style={{ border: '1px solid #E9EEF6', outline: 'none', color: '#0f172a' }}
+                        rows={3}
+                      />
+                    </div>
+                  </>
+                ) : selectedEntity.service_provider_id ? (
+                  // Service Provider update form
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>Shop Name</label>
+                      <input
+                        type="text"
+                        value={updateForm.shop_name || ''}
+                        onChange={(e) => setUpdateForm({ ...updateForm, shop_name: e.target.value })}
+                        className="w-full px-4 py-3 rounded-lg transition-all"
+                        style={{ border: '1px solid #E9EEF6', outline: 'none', color: '#0f172a' }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>Service Name</label>
+                      <input
+                        type="text"
+                        value={updateForm.service_name || ''}
+                        onChange={(e) => setUpdateForm({ ...updateForm, service_name: e.target.value })}
+                        className="w-full px-4 py-3 rounded-lg transition-all"
+                        style={{ border: '1px solid #E9EEF6', outline: 'none', color: '#0f172a' }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>Contact</label>
+                      <input
+                        type="text"
+                        value={updateForm.contact || ''}
+                        onChange={(e) => setUpdateForm({ ...updateForm, contact: e.target.value })}
                         className="w-full px-4 py-3 rounded-lg transition-all"
                         style={{ border: '1px solid #E9EEF6', outline: 'none', color: '#0f172a' }}
                       />

@@ -1,8 +1,19 @@
-import { userDetais, traderDetails, updateUserById, deleteUserById, updateTraderById, deleteTraderById, addslugsbyname} from "../models/adminModel.js";
+import { 
+  userDetais, 
+  traderDetails, 
+  updateUserById, 
+  deleteUserById, 
+  updateTraderById, 
+  deleteTraderById, 
+  addslugsbyname, 
+  updateServiceProviderById,
+  getAllServiceProviders,
+  deleteServiceProviderById
+} from "../models/adminModel.js";
 
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await userDetais(); // call model function
+    const users = await userDetais();
 
     if (!users || users.length === 0) {
       return res.status(404).json({ message: "No users found" });
@@ -46,10 +57,9 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-
 export const getAllTraders = async (req, res) => {
   try {
-    const traders = await traderDetails(); 
+    const traders = await traderDetails();
 
     if (!traders || traders.length === 0) {
       return res.status(404).json({ message: "No verified traders found" });
@@ -72,7 +82,7 @@ export const getAllTraders = async (req, res) => {
 
 export const updateTrader = async (req, res) => {
   try {
-    const { id } = req.params; 
+    const { id } = req.params;
     const data = req.body;
     const result = await updateTraderById(id, data);
     res.status(200).json({ success: true, message: "Trader updated successfully", data: result });
@@ -84,7 +94,7 @@ export const updateTrader = async (req, res) => {
 
 export const deleteTrader = async (req, res) => {
   try {
-    const { id } = req.params; 
+    const { id } = req.params;
     await deleteTraderById(id);
     res.status(200).json({ success: true, message: "Trader deleted successfully from both tables" });
   } catch (error) {
@@ -93,30 +103,70 @@ export const deleteTrader = async (req, res) => {
   }
 };
 
-export const addSlugs = async (req,res) => {
+// Service Provider Functions
+export const getAllServiceProvider = async (req, res) => {
   try {
-    const {category_name, slug_name} = req.body;
+    const serviceProviders = await getAllServiceProviders();
 
-    if(!category_name || !slug_name){
-      return res.status(400).json({error: "Category_name and Slug_name are required"});
+    if (!serviceProviders || serviceProviders.length === 0) {
+      return res.status(404).json({ message: "No service providers found" });
     }
 
-    const result = await addslugsbyname(category_name,slug_name);
+    res.status(200).json({
+      success: true,
+      count: serviceProviders.length,
+      data: serviceProviders,
+    });
+  } catch (error) {
+    console.error("Error fetching service providers:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while fetching service providers",
+      error: error.message,
+    });
+  }
+};
+
+export const updateServiceProvider = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = req.body;
+    const result = await updateServiceProviderById(id, data);
+    res.status(200).json({ success: true, message: "Service Provider updated successfully", data: result });
+  } catch (error) {
+    console.error("Error updating service provider:", error);
+    res.status(500).json({ success: false, message: "Error updating service provider", error: error.message });
+  }
+};
+
+export const deleteServiceProvider = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await deleteServiceProviderById(id);
+    res.status(200).json({ success: true, message: "Service Provider deleted successfully from both tables" });
+  } catch (error) {
+    console.error("Error deleting service provider:", error);
+    res.status(500).json({ success: false, message: "Error deleting service provider", error: error.message });
+  }
+};
+
+export const addSlugs = async (req, res) => {
+  try {
+    const { category_name, slug_name } = req.body;
+
+    if (!category_name || !slug_name) {
+      return res.status(400).json({ error: "Category_name and Slug_name are required" });
+    }
+
+    const result = await addslugsbyname(category_name, slug_name);
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Something went Wrong!!' });
     }
 
     res.status(200).json({ message: 'Category added successfully' });
-  }
-  catch (error) {
+  } catch (error) {
     console.error('Error updating user:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-}
-
-
-
-
-
-
+};

@@ -5,6 +5,7 @@ import traderRoutes from './routes/traderRoutes.js'
 import categoryRoutes from './routes/categoryRoutes.js'
 import adminRoutes from './routes/adminRoutes.js'
 import productRoutes from './routes/productRoutes.js'
+import serviceproviderRoutes from './routes/serviceProviderRoutes.js'
 import cookieParser from 'cookie-parser'
 import cors from 'cors';
 
@@ -29,6 +30,7 @@ app.use('/api/trader',traderRoutes);
 app.use('/api/category',categoryRoutes);
 app.use('/api/admin',adminRoutes);
 app.use('/api/product',productRoutes);
+app.use('/api/serviceprovider',serviceproviderRoutes);
 
 app.listen(PORT, () => {
     console.log(`Listening...`);

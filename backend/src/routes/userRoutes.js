@@ -11,3 +11,4 @@ router.put('/update',verifyToken,updateUser)
 router.post('/logout', verifyToken, logout);
 
 export default router;
+

@@ -114,3 +114,33 @@ export const getProductsByTraderId = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+import { getProductsBySlug, getProductById, getAllSlugs } from '../models/productmodel.js';
+
+// Ge
+
+// Get products by category (slug)
+export const getProductsByCategory = async (req, res) => {
+  try {
+    const { category } = req.params;
+    const products = await getProductsBySlug(category);
+    
+    if (products.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Category not found or no products in this category'
+      });
+    }
+
+    const products = await getProductsByTraderIdModel(trader_id);
+
+    res.status(200).json({
+      success: true,
+      count: products.length,
+      data: products,
+    });
+  } catch (error) {
+    console.error("Error fetching trader products:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+

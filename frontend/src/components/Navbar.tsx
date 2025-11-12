@@ -513,21 +513,67 @@ export default function Navigation() {
                           />
                           <div className="w-screen max-w-md flex-auto overflow-hidden rounded-3xl bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5 relative">
                             <div className="p-4">
-                              <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
-                                <Link href="/modules/auth/SignIn" className="font-semibold text-gray-900" onClick={close}>
-                                  Login
-                                </Link>
-                              </div>
-                              <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
-                                <Link href="/modules/auth/TraderSignUp" className="font-semibold text-gray-900" onClick={close}>
-                                  Become a Trader
-                                </Link>
-                              </div>
-                              <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
-                                <Link href="/modules/auth/ServiceProviderSingup" className="font-semibold text-gray-900" onClick={close}>
-                                  Become a Service Provider
-                                </Link>
-                              </div>
+                              {user ? (
+                                <>
+                                  {user.role === 'trader' && (
+                                    <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
+                                      <Link
+                                        href="/profile/trader"
+                                        className="font-semibold text-gray-900 flex items-center gap-2"
+                                        onClick={close}
+                                      >
+                                        <BusinessIcon className="h-4 w-4" />
+                                        Trader Profile
+                                      </Link>
+                                    </div>
+                                  )}
+                                  <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
+                                    <Link
+                                      href="/profile/user"
+                                      className="font-semibold text-gray-900 flex items-center gap-2"
+                                      onClick={close}
+                                    >
+                                      <PersonOutlineIcon className="h-4 w-4" />
+                                      My Profile
+                                    </Link>
+                                  </div>
+                                  <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
+                                    <button
+                                      onClick={() => {
+                                        handleLogout();
+                                        close();
+                                      }}
+                                      className="font-semibold text-red-600 flex items-center gap-2 w-full text-left"
+                                    >
+                                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                      </svg>
+                                      Logout
+                                    </button>
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
+                                    <Link
+                                      href="/modules/auth/SignIn"
+                                      className="font-semibold text-gray-900"
+                                      onClick={close}
+                                    >
+                                      Login
+                                    </Link>
+                                  </div>
+                                  <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
+                                    <Link
+                                      href="/modules/auth/TraderSignUp"
+                                      className="font-semibold text-gray-900"
+                                      onClick={close}
+                                    >
+                                      Become a Trader
+                                    </Link>
+                                  </div>
+                                </>
+                              )}
                             </div>
                           </div>
                         </Popover.Panel>

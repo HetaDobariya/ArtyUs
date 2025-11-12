@@ -26,6 +26,7 @@ interface Step2Data {
 
 export default function ServiceProviderSignUp() {
     const [step, setStep] = useState(1);
+    const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState<Step1Data & Step2Data>({
         name: '',
         email: '',
@@ -33,7 +34,7 @@ export default function ServiceProviderSignUp() {
         confirmPassword: '',
         address: '',
         contactNumber: '',
-        serviceNames: [''],
+        serviceNames: [],
         shopName: '',
         serviceAddress: '',
         description: '',
@@ -50,7 +51,7 @@ export default function ServiceProviderSignUp() {
         if (currentServiceName.trim()) {
             setFormData((prev) => ({
                 ...prev,
-                serviceNames: [...prev.serviceNames.filter(name => name !== ''), currentServiceName.trim()],
+                serviceNames: [...prev.serviceNames, currentServiceName.trim()],
             }));
             setCurrentServiceName('');
         }
@@ -78,31 +79,86 @@ export default function ServiceProviderSignUp() {
         setStep(1);
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setLoading(true);
         
-        // Add the current service name if it's not empty
-        if (currentServiceName.trim()) {
-            addServiceName();
-        }
-        
-        // Check if at least one service name is added
-        const validServiceNames = formData.serviceNames.filter(name => name.trim() !== '');
-        if (validServiceNames.length === 0 && !currentServiceName.trim()) {
-            alert('Please add at least one service name!');
-            return;
-        }
-        
-        // Final submission logic
-        const finalData = {
-            ...formData,
-            serviceNames: currentServiceName.trim() 
+        try {
+            // Add the current service name if it's not empty
+            if (currentServiceName.trim()) {
+                addServiceName();
+            }
+            
+            // Check if at least one service name is added
+            const validServiceNames = formData.serviceNames.filter(name => name.trim() !== '');
+            if (validServiceNames.length === 0 && !currentServiceName.trim()) {
+                alert('Please add at least one service name!');
+                setLoading(false);
+                return;
+            }
+            
+            // Prepare final data with formatted service names
+            const finalServiceNames = currentServiceName.trim() 
                 ? [...validServiceNames, currentServiceName.trim()]
-                : validServiceNames
-        };
-        console.log('Final Form Data:', finalData);
-        alert('Sign Up Successful!');
-        // Here you would typically send the data to your backend API
+                : validServiceNames;
+
+            // Format service names: lowercase and comma-separated
+            const formattedServiceName = finalServiceNames
+                .map(name => name.toLowerCase().trim())
+                .join(', ');
+
+            const submissionData = {
+                name: formData.name,
+                email: formData.email,
+                password: formData.password,
+                address: formData.address,
+                contactNumber: formData.contactNumber,
+                shopName: formData.shopName,
+                serviceName: formattedServiceName,
+                serviceAddress: formData.serviceAddress,
+                description: formData.description,
+                serviceContactNumber: formData.serviceContactNumber,
+            };
+
+            console.log('Submitting data:', submissionData);
+
+            // Send data to backend
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/serviceprovider/signup`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(submissionData),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert('Sign Up Successful!');
+                // Reset form or redirect to login
+                setFormData({
+                    name: '',
+                    email: '',
+                    password: '',
+                    confirmPassword: '',
+                    address: '',
+                    contactNumber: '',
+                    serviceNames: [],
+                    shopName: '',
+                    serviceAddress: '',
+                    description: '',
+                    serviceContactNumber: '',
+                });
+                setStep(1);
+            } else {
+                alert(data.error || 'Sign up failed. Please try again.');
+            }
+        } catch (error) {
+            console.error('Signup error:', error);
+            alert('An error occurred during sign up. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -216,9 +272,9 @@ export default function ServiceProviderSignUp() {
                                     </div>
                                     
                                     {/* Display added service names */}
-                                    {formData.serviceNames.filter(name => name.trim() !== '').length > 0 && (
+                                    {formData.serviceNames.length > 0 && (
                                         <div className="mt-3 space-y-2">
-                                            {formData.serviceNames.filter(name => name.trim() !== '').map((service, index) => (
+                                            {formData.serviceNames.map((service, index) => (
                                                 <div
                                                     key={index}
                                                     className="flex items-center justify-between px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg"
@@ -283,9 +339,10 @@ export default function ServiceProviderSignUp() {
                                     </button>
                                     <button
                                         type="submit"
-                                        className="w-1/2 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 transition duration-200"
+                                        disabled={loading}
+                                        className="w-1/2 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        SUBMIT
+                                        {loading ? 'SUBMITTING...' : 'SUBMIT'}
                                     </button>
                                 </div>
                             </form>
@@ -306,7 +363,7 @@ export default function ServiceProviderSignUp() {
                         <Image
                             src={Image1}
                             alt="profile"
-                            className="object-contain  w-[739px]"
+                            className="object-contain w-[739px]"
                         />
                     </div>
                 </div>
