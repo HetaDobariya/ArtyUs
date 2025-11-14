@@ -6,6 +6,7 @@ import categoryRoutes from './routes/categoryRoutes.js'
 import adminRoutes from './routes/adminRoutes.js'
 import productRoutes from './routes/productRoutes.js'
 import serviceproviderRoutes from './routes/serviceProviderRoutes.js'
+import cartRoutes from './routes/cartRoutes.js'
 import cookieParser from 'cookie-parser'
 import cors from 'cors';
 
@@ -31,6 +32,7 @@ app.use('/api/category',categoryRoutes);
 app.use('/api/admin',adminRoutes);
 app.use('/api/product',productRoutes);
 app.use('/api/serviceprovider',serviceproviderRoutes);
+app.use('/api/cart', cartRoutes);
 
 app.listen(PORT, () => {
     console.log(`Listening...`);
