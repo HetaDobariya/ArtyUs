@@ -1,6 +1,5 @@
 import pool from '../config/db.js';
 
-<<<<<<< HEAD
 export const addProductModel = async (data) => {
   const { slug_id, trader_id, product_name, qty, price, description, image_url } = data;
 
@@ -83,7 +82,6 @@ export const getProductsByTraderIdModel = async (trader_id) => {
   const [rows] = await pool.query(sql, [trader_id]);
   return rows;
 };
-=======
 // Get all products
 export const getAllProducts = async () => {
   const query = `
@@ -165,4 +163,3 @@ export const getAllSlugs = async () => {
   return rows;
 };
 
->>>>>>> origin/krutarth-dev

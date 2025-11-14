@@ -15,7 +15,6 @@ router.delete("/delete/:id", deleteProduct);
 
 
 import { 
-  getProducts, 
   getProductsByCategory, 
   getProduct, 
   getCategories 
@@ -27,7 +26,7 @@ import {
 router.get('/categories', getCategories);
 
 // Get all products
-router.get('/', getProducts);
+router.get('/', getProduct);
 
 // Get products by category
 router.get('/category/:category', getProductsByCategory);
