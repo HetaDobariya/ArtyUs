@@ -1,11 +1,11 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_URL = process.env.NEXT_PUBLIC_BACKEND || 'http://localhost:8000';
 
 async function getProduct(productId: string) {
   try {
-    const response = await fetch(`${API_URL}/api/products/${productId}`, {
+    const response = await fetch(`${API_URL}/product/${productId}`, {
       cache: 'no-store', // Always fetch fresh data
     });
     
