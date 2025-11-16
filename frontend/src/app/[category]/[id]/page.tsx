@@ -1,18 +1,18 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_URL = process.env.NEXT_PUBLIC_BACKEND || 'http://localhost:8000';
 
 async function getProduct(productId: string) {
   try {
-    const response = await fetch(`${API_URL}/api/product/${productId}`, {
+    const response = await fetch(`${API_URL}/product/${productId}`, {
       cache: 'no-store', // Always fetch fresh data
     });
-    
+
     if (!response.ok) {
       return null;
     }
-    
+
     const result = await response.json();
     return result.success ? result.data : null;
   } catch (error) {
@@ -116,7 +116,7 @@ export default async function ProductDetailPage({
 
             {/* Back Button */}
             <div className="pt-6">
-              <Link 
+              <Link
                 href={`/${category}`}
                 className="text-blue-600 hover:underline inline-flex items-center"
               >

@@ -69,7 +69,44 @@ interface Product {
 }
 
 const TraderDashboard: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>([
+    {
+      id: '1',
+      name: 'Week Planner',
+      category: 'Weekly Planner',
+      price: 500,
+      quantity: 5,
+      description: 'Plan your week with our simple and efficient black and white themed planner.',
+      imageUrl: '/api/placeholder/300/400'
+    },
+    {
+      id: '2',
+      name: 'Magnetic Week Planner',
+      category: 'Weekly Planner',
+      price: 1850,
+      quantity: 8,
+      description: 'Transparent magnetic week planner to keep track of all your todos and reminders.',
+      imageUrl: '/api/placeholder/300/400'
+    },
+    {
+      id: '3',
+      name: 'Pastel Exam Board',
+      category: 'Exam Boards',
+      price: 210,
+      quantity: 10,
+      description: 'Adorable clipboards, featuring lovely illustrations in soft pastel colors. A perfect and playful accessory for school, home, or office use.',
+      imageUrl: '/api/placeholder/300/400'
+    },
+    {
+      id: '4',
+      name: 'Pastel Exam Boards',
+      category: 'Exam Boards',
+      price: 120,
+      quantity: 15,
+      description: 'Adorable clipboards in soft pastel colors. A perfect and playful accessory for school, home, or office use.',
+      imageUrl: '/api/placeholder/300/400'
+    }
+  ]);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -216,7 +253,7 @@ const TraderDashboard: React.FC = () => {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         console.error('Backend error response:', errorData);
-        throw new Error(errorData.message || `Failed to save product: ${response.statusText}`);
+        throw new Error(`errorData.message || Failed to save product: ${response.statusText}`);
       }
 
       // 5. Get the saved product back from the DB
@@ -341,7 +378,7 @@ const TraderDashboard: React.FC = () => {
               key={product.id}
               className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-all"
               style={{
-                animation: `fadeInUp 0.5s ease- out ${index * 0.1} s both`
+                animation: `fadeInUp 0.5s ease- out ${index * 0.1}s both`
               }}
             >
               <div className="flex flex-col md:flex-row gap-4 p-6">
@@ -401,111 +438,13 @@ const TraderDashboard: React.FC = () => {
       </main >
 
       {/* Add Product Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-100">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">Add Product</h2>
-                <button
-                  onClick={() => {
-                    setShowAddModal(false);
-                    resetForm();
-                  }}
-                  className="text-gray-500 hover:text-gray-700 transition-colors"
-                >
-                  <X size={24} />
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                {/* Image Upload */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Product Image
-                  </label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-purple-500 transition-colors cursor-pointer">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="hidden"
-                      id="add-image-upload"
-                    />
-                    <label htmlFor="add-image-upload" className="cursor-pointer">
-                      {imagePreview ? (
-                        <img src={imagePreview} alt="Preview" className="w-full h-48 object-cover rounded-lg mb-2" />
-                      ) : (
-                        <div className="flex flex-col items-center">
-                          <Upload className="text-gray-400 mb-2" size={40} />
-                          <p className="text-gray-600 text-sm">Click to upload image</p>
-                        </div>
-                      )}
-                    </label>
-                  </div>
-                </div>
-
-                {/* Category Select - Updated to display slug_name along with child_category_name */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category
-                  </label>
-                  <select
-                    name="slug_id"
-                    value={formData.slug_id}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                  >
-                    <option value="">Select Category</option>
-                    {loading ? (
-                      <option value="" disabled>Loading categories...</option>
-                    ) : (
-                      categories.map((category) => (
-                        <option key={category.id} value={category.id}>
-                          {category.slug_name} - {category.child_category_name}
-                        </option>
-                      ))
-                    )}
-                  </select>
-                </div>
-
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="Product name"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                />
-
-                <input
-                  type="number"
-                  name="price"
-                  value={formData.price}
-                  onChange={handleInputChange}
-                  placeholder="Price"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                />
-
-                <input
-                  type="number"
-                  name="quantity"
-                  value={formData.quantity}
-                  onChange={handleInputChange}
-                  placeholder="Quantity"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                />
-
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  placeholder="Description"
-                  rows={3}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all resize-none"
-                />
-
-                <div className="flex gap-3 pt-4">
+      {
+        showAddModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-100">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-gray-800">Add Product</h2>
                   <button
                     onClick={() => {
                       setShowAddModal(false);
@@ -513,14 +452,7 @@ const TraderDashboard: React.FC = () => {
                     }}
                     className="text-gray-500 hover:text-gray-700 transition-colors"
                   >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleAddProduct}
-                    className="flex-1 px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-all duration-300 transform hover:scale-105 shadow-lg disabled:opacity-50"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? 'Adding...' : 'ADD'}
+                    <X size={24} />
                   </button>
                 </div>
 
@@ -575,32 +507,6 @@ const TraderDashboard: React.FC = () => {
                     </select>
                   </div>
 
-                {/* Category Select - Updated to display slug_name along with child_category_name */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category
-                  </label>
-                  <select
-                    name="slug_id"
-                    value={formData.slug_id}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                  >
-                    <option value="">Select Category</option>
-                    {loading ? (
-                      <option value="" disabled>Loading categories...</option>
-                    ) : (
-                      categories.map((category) => (
-                        <option key={category.id} value={category.id}>
-                          {category.slug_name} - {category.child_category_name}
-                        </option>
-                      ))
-                    )}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
                   <input
                     type="text"
                     name="name"
@@ -676,15 +582,9 @@ const TraderDashboard: React.FC = () => {
                       setSelectedProduct(null);
                       resetForm();
                     }}
-                    className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-300"
+                    className="text-gray-500 hover:text-gray-700 transition-colors"
                   >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleEditProduct}
-                    className="flex-1 px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-all duration-300 transform hover:scale-105 shadow-lg"
-                  >
-                    UPDATE
+                    <X size={24} />
                   </button>
                 </div>
 
@@ -809,20 +709,19 @@ const TraderDashboard: React.FC = () => {
       }
 
       <style jsx>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
+          @keyframes fadeInUp {
+            from {
+              opacity: 0;
+              transform: translateY(30px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
           }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
+        `}</style>
     </div >
   );
-  </div>
 };
 
 export default TraderDashboard;
