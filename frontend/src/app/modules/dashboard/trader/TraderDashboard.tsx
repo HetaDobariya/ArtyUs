@@ -95,13 +95,13 @@ const TraderDashboard: React.FC = () => {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/product/my-products`, {
         credentials: 'include'
       });
-
+      
       if (!response.ok) {
         throw new Error('Failed to fetch products');
       }
 
       const data = await response.json();
-
+      
       if (data.success) {
         // Transform the backend data to match our frontend Product interface
         const transformedProducts: Product[] = data.data.map((product: any) => ({
@@ -113,7 +113,7 @@ const TraderDashboard: React.FC = () => {
           description: product.description,
           imageUrl: product.image_url || '/api/placeholder/300/400'
         }));
-
+        
         setProducts(transformedProducts);
       } else {
         console.error('Failed to fetch products:', data.error);
@@ -258,7 +258,7 @@ const TraderDashboard: React.FC = () => {
 
       // Refresh the products list
       await fetchTraderProducts();
-
+      
       setShowAddModal(false);
       resetForm();
 
@@ -311,7 +311,7 @@ const TraderDashboard: React.FC = () => {
 
       // Refresh the products list
       await fetchTraderProducts();
-
+      
       setShowEditModal(false);
       setSelectedProduct(null);
       resetForm();
@@ -344,7 +344,7 @@ const TraderDashboard: React.FC = () => {
 
       // Refresh the products list
       await fetchTraderProducts();
-
+      
     } catch (error) {
       console.error('Failed to delete product:', error);
       alert(`Error: ${(error as Error).message}`);
