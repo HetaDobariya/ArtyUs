@@ -6,15 +6,15 @@ import categoryRoutes from './routes/categoryRoutes.js'
 import adminRoutes from './routes/adminRoutes.js'
 import productRoutes from './routes/productRoutes.js'
 import serviceproviderRoutes from './routes/serviceProviderRoutes.js'
+import cartRoutes from './routes/cartRoutes.js'
+import orderRoutes from './routes/orderRoutes.js'
 import cookieParser from 'cookie-parser'
 import cors from 'cors';
 
 dotenv.config();
 
-
 const app= express();
 const PORT = process.env.PORT;
-
 
 app.use(cors({
     origin:process.env.FRONTEND_URL,
@@ -31,6 +31,8 @@ app.use('/api/category',categoryRoutes);
 app.use('/api/admin',adminRoutes);
 app.use('/api/product',productRoutes);
 app.use('/api/serviceprovider',serviceproviderRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/orders', orderRoutes);
 
 app.listen(PORT, () => {
     console.log(`Listening...`);

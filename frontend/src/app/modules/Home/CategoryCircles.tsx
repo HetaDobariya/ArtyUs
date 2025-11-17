@@ -26,7 +26,7 @@ const Categories = [
   {
     id: 4,
     name: 'pencils',
-    href: '/pencils',
+    href: '/pencil',
     imageSrc: '/image/HomeImages/SketchCircle.jpg',
     imageAlt: 'pencils',
   },

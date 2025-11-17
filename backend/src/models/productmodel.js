@@ -83,7 +83,6 @@ export const getProductsByTraderIdModel = async (trader_id) => {
   return rows;
 };
 
-
 // Get products by slug name (category)
 export const getProductsBySlug = async (slugName) => {
   const query = `
@@ -142,3 +141,4 @@ export const getAllSlugs = async () => {
   const [rows] = await pool.query(query);
   return rows;
 };
+
