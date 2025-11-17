@@ -11,7 +11,6 @@ import logo from '../../public/Arty-US_logo.png';
 import { Fragment, useState, useEffect } from 'react';
 import { useUser } from '@/contexts/UserContext'; // ✅ added
 
-// Your existing navigation data remains unchanged
 const navigation = {
   categories: [
     {
@@ -90,17 +89,14 @@ const navigation = {
             { name: 'Spray Paints' },
           ],
         },
-        {
-          id: 'sketchSupplies',
-          name: 'Sketch Supplies',
-          items: [
-            { name: 'Craft Papers' },
-            { name: 'Canvas Boards' },
-            { name: 'Sketch Books' },
-          ],
-        },
-      ],
-    },
+
+interface ApiChildCategory {
+  id: number;
+  name: string;
+  category_id: number;
+  created_at: string;
+}
+
     {
       id: 'Planners',
       name: 'Planners',
