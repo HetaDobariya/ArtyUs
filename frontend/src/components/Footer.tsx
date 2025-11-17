@@ -16,11 +16,11 @@ const LINKS = [
   },
   {
     title: 'Company',
-    items: [{ title: 'About Us', link: '/aboutus' }],
+    items: [{ title: 'About Us', link: '/modules/AboutUs' }],
   },
   {
     title: 'Resource',
-    items: [{ title: 'Blog', link: '/blog' }],
+    items: [{ title: 'Blog', link: '/modules/Blog' }],
   },
 ];
 

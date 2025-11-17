@@ -8,11 +8,11 @@ async function getProduct(productId: string) {
     const response = await fetch(`${API_URL}/product/${productId}`, {
       cache: 'no-store', // Always fetch fresh data
     });
-    
+
     if (!response.ok) {
       return null;
     }
-    
+
     const result = await response.json();
     return result.success ? result.data : null;
   } catch (error) {
@@ -116,7 +116,7 @@ export default async function ProductDetailPage({
 
             {/* Back Button */}
             <div className="pt-6">
-              <Link 
+              <Link
                 href={`/${category}`}
                 className="text-blue-600 hover:underline inline-flex items-center"
               >

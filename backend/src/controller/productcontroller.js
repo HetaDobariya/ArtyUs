@@ -1,4 +1,4 @@
-import { addProductModel, getAllProductsModel, updateProductById, deleteProductById, getProductsByTraderIdModel } from '../models/productmodel.js';
+import { addProductModel, getAllProductsModel, updateProductById, deleteProductById, getProductsByTraderIdModel,  getProductsBySlug, getProductById, getAllSlugs } from '../models/productmodel.js';
 
 export const addProduct = async (req, res) => {
   try {
@@ -114,9 +114,10 @@ export const getProductsByTraderId = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-import { getProductsBySlug, getProductById, getAllSlugs } from '../models/productmodel.js';
 
-// Ge
+
+// KRUTARTH
+
 
 // Get products by category (slug)
 export const getProductsByCategory = async (req, res) => {
@@ -190,22 +191,3 @@ export const getProduct = async (req, res) => {
     });
   }
 };
-
-// Get all available categories (slugs)
-export const getCategories = async (req, res) => {
-  try {
-    const categories = await getAllSlugs();
-    res.status(200).json({
-      success: true,
-      data: categories
-    });
-  } catch (error) {
-    console.error('Error fetching categories:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch categories',
-      error: error.message
-    });
-  }
-};
-
