@@ -407,7 +407,7 @@ const TraderDashboard: React.FC = () => {
           <div className="text-center py-12">
             <Package size={64} className="mx-auto text-gray-400 mb-4" />
             <h3 className="text-xl font-semibold text-gray-700 mb-2">No Products Found</h3>
-            <p className="text-gray-500 mb-6">You haven't added any products yet.</p>
+            <p className="text-gray-500 mb-6">You haven&apost added any products yet.</p>
             <button
               onClick={openAddModal}
               className="flex items-center gap-2 bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-all duration-300 shadow-md mx-auto"
