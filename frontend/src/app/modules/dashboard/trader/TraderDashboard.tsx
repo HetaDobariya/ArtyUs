@@ -92,7 +92,7 @@ const TraderDashboard: React.FC = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/category/getslugs`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/category/getslugs`);
         const data = await response.json();
 
         if (data.success) {
@@ -202,7 +202,7 @@ const TraderDashboard: React.FC = () => {
       console.log('Sending payload to backend:', payload);
 
       // 4. Send data to backend API
-      const apiEndpoint = `${process.env.NEXT_PUBLIC_BACKEND}/product/add-product`;
+      const apiEndpoint = `${process.env.NEXT_PUBLIC_BACKEND}/api/product/add-product`;
 
       const response = await fetch(apiEndpoint, {
         method: 'POST',
@@ -398,7 +398,7 @@ const TraderDashboard: React.FC = () => {
             </div>
           ))}
         </div>
-      </main >
+      </main>
 
       {/* Add Product Modal */}
       {showAddModal && (
@@ -511,7 +511,7 @@ const TraderDashboard: React.FC = () => {
                       setShowAddModal(false);
                       resetForm();
                     }}
-                    className="text-gray-500 hover:text-gray-700 transition-colors"
+                    className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-300"
                   >
                     Cancel
                   </button>
@@ -523,142 +523,10 @@ const TraderDashboard: React.FC = () => {
                     {isSubmitting ? 'Adding...' : 'ADD'}
                   </button>
                 </div>
-
-                <div className="space-y-4">
-                  {/* Image Upload */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Product Image
-                    </label>
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-purple-500 transition-colors cursor-pointer">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="hidden"
-                        id="add-image-upload"
-                      />
-                      <label htmlFor="add-image-upload" className="cursor-pointer">
-                        {imagePreview ? (
-                          <img src={imagePreview} alt="Preview" className="w-full h-48 object-cover rounded-lg mb-2" />
-                        ) : (
-                          <div className="flex flex-col items-center">
-                            <Upload className="text-gray-400 mb-2" size={40} />
-                            <p className="text-gray-600 text-sm">Click to upload image</p>
-                          </div>
-                        )}
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* Category Select - Updated to display slug_name along with child_category_name */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Category
-                    </label>
-                    <select
-                      name="slug_id"
-                      value={formData.slug_id}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                    >
-                      <option value="">Select Category</option>
-                      {loading ? (
-                        <option value="" disabled>Loading categories...</option>
-                      ) : (
-                        categories.map((category) => (
-                          <option key={category.id} value={category.id}>
-                            {category.slug_name} - {category.child_category_name}
-                          </option>
-                        ))
-                      )}
-                    </select>
-                  </div>
-
-                {/* Category Select - Updated to display slug_name along with child_category_name */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category
-                  </label>
-                  <select
-                    name="slug_id"
-                    value={formData.slug_id}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                  >
-                    <option value="">Select Category</option>
-                    {loading ? (
-                      <option value="" disabled>Loading categories...</option>
-                    ) : (
-                      categories.map((category) => (
-                        <option key={category.id} value={category.id}>
-                          {category.slug_name} - {category.child_category_name}
-                        </option>
-                      ))
-                    )}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    placeholder="Product name"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                  />
-
-                  <input
-                    type="number"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleInputChange}
-                    placeholder="Price"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                  />
-
-                  <input
-                    type="number"
-                    name="quantity"
-                    value={formData.quantity}
-                    onChange={handleInputChange}
-                    placeholder="Quantity"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                  />
-
-                  <textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    placeholder="Description"
-                    rows={3}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all resize-none"
-                  />
-
-                  <div className="flex gap-3 pt-4">
-                    <button
-                      onClick={() => {
-                        setShowAddModal(false);
-                        resetForm();
-                      }}
-                      className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-300"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleAddProduct}
-                      className="flex-1 px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-all duration-300 transform hover:scale-105 shadow-lg disabled:opacity-50"
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? 'Adding...' : 'ADD'}
-                    </button>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
+        </div>
         )
       }
 
@@ -676,15 +544,9 @@ const TraderDashboard: React.FC = () => {
                       setSelectedProduct(null);
                       resetForm();
                     }}
-                    className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-300"
+                    className="text-gray-500 hover:text-gray-700 transition-colors"
                   >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleEditProduct}
-                    className="flex-1 px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-all duration-300 transform hover:scale-105 shadow-lg"
-                  >
-                    UPDATE
+                    <X size={24} />
                   </button>
                 </div>
 
@@ -820,9 +682,8 @@ const TraderDashboard: React.FC = () => {
           }
         }
       `}</style>
-    </div >
+    </div>
   );
-  </div>
 };
 
 export default TraderDashboard;

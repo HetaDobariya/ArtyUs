@@ -81,9 +81,9 @@ export default function Navigation() {
       try {
         setIsLoading(true);
 
-        const catUrl = `${process.env.NEXT_PUBLIC_BACKEND}/category/getCategory`;
-        const childCatUrl = `${process.env.NEXT_PUBLIC_BACKEND}/category/getChildCategory`;
-        const slugsUrl = `${process.env.NEXT_PUBLIC_BACKEND}/category/getSlugs`;
+        const catUrl = `${process.env.NEXT_PUBLIC_BACKEND}/api/category/getCategory`;
+        const childCatUrl = `${process.env.NEXT_PUBLIC_BACKEND}/api/category/getChildCategory`;
+        const slugsUrl = `${process.env.NEXT_PUBLIC_BACKEND}/api/category/getslugs`;
 
         const [catRes, childCatRes, slugsRes] = await Promise.all([
           fetch(catUrl, { credentials: 'include' }),
@@ -91,17 +91,30 @@ export default function Navigation() {
           fetch(slugsUrl, { credentials: 'include' })
         ]);
 
-        if (!catRes.ok || !childCatRes.ok || !slugsRes.ok) {
-          throw new Error(`Failed to fetch navigation data. Statuses: ${catRes.status}, ${childCatRes.status}, ${slugsRes.status}`);
+        // Handle responses - 404 means no data, which is acceptable
+        let catData, childCatData, slugsData;
+        
+        try {
+          catData = catRes.ok ? await catRes.json() : { data: [] };
+        } catch (e) {
+          catData = { data: [] };
+        }
+        
+        try {
+          childCatData = childCatRes.ok ? await childCatRes.json() : { data: [] };
+        } catch (e) {
+          childCatData = { data: [] };
+        }
+        
+        try {
+          slugsData = slugsRes.ok ? await slugsRes.json() : { data: [] };
+        } catch (e) {
+          slugsData = { data: [] };
         }
 
-        const catData = await catRes.json();
-        const childCatData = await childCatRes.json();
-        const slugsData = await slugsRes.json();
-
-        const mainCategories: ApiCategory[] = catData.data || catData;
-        const allChildCategories: ApiChildCategory[] = childCatData.data || childCatData;
-        const allSlugs: ApiSlug[] = slugsData.data || slugsData;
+        const mainCategories: ApiCategory[] = (catData?.data || (Array.isArray(catData) ? catData : [])) || [];
+        const allChildCategories: ApiChildCategory[] = (childCatData?.data || (Array.isArray(childCatData) ? childCatData : [])) || [];
+        const allSlugs: ApiSlug[] = (slugsData?.data || (Array.isArray(slugsData) ? slugsData : [])) || [];
 
         const structuredCategories: UiCategory[] = mainCategories.map(mainCat => {
           const childrenForThisCat = allChildCategories.filter(
@@ -147,7 +160,7 @@ export default function Navigation() {
 
   const handleLogout = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/logout`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/user/logout`, {
         method: 'POST',
         credentials: 'include',
       });

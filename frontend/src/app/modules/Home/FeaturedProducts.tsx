@@ -21,15 +21,18 @@ interface Product {
 // --- 2. Data Fetching Logic (SYNTAX CLEANED) ---
 async function fetchProducts(): Promise<Product[]> {
     try {
-        const productsUrl = `${process.env.NEXT_PUBLIC_BACKEND}/product/getproducts`;
+        const productsUrl = `${process.env.NEXT_PUBLIC_BACKEND}/api/product/getproducts`;
 
         const response = await fetch(productsUrl, {
             credentials: 'include'
         });
 
-        console.log(response);
-
         if (!response.ok) {
+            // If 404 or other error, return empty array instead of throwing
+            if (response.status === 404) {
+                console.log("No products found (404)");
+                return [];
+            }
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
@@ -38,14 +41,17 @@ async function fetchProducts(): Promise<Product[]> {
         // Safely extract the product array.
         let productArray: Product[] = [];
 
-        if (result && Array.isArray(result.products)) {
-            // Case 1: Response is wrapped, e.g., { products: [...] }
+        if (result && result.data && Array.isArray(result.data)) {
+            // Case 1: Response is wrapped, e.g., { data: [...] }
+            productArray = result.data;
+        } else if (result && Array.isArray(result.products)) {
+            // Case 2: Response is wrapped, e.g., { products: [...] }
             productArray = result.products;
         } else if (Array.isArray(result)) {
-            // Case 2: Response is directly the array [...]
+            // Case 3: Response is directly the array [...]
             productArray = result;
         } else {
-            // Case 3: Malformed data, productArray remains []
+            // Case 4: Malformed data, productArray remains []
             console.log("API returned object that did not contain a product array.");
         }
 

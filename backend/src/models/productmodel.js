@@ -1,6 +1,5 @@
 import pool from '../config/db.js';
 
-<<<<<<< HEAD
 export const addProductModel = async (data) => {
   const { slug_id, trader_id, product_name, qty, price, description, image_url } = data;
 
@@ -60,7 +59,6 @@ export const deleteProductById = async (id) => {
   return result;
 };
 
-
 export const getProductsByTraderIdModel = async (trader_id) => {
   const sql = `
     SELECT 
@@ -83,28 +81,6 @@ export const getProductsByTraderIdModel = async (trader_id) => {
   const [rows] = await pool.query(sql, [trader_id]);
   return rows;
 };
-=======
-// Get all products
-export const getAllProducts = async () => {
-  const query = `
-    SELECT 
-      p.id,
-      p.product_name as name,
-      p.price,
-      p.qty as quantity,
-      p.description,
-      p.image_url as image,
-      s.name as category,
-      t.shop_name as company,
-      p.description as details
-    FROM product p
-    JOIN slug s ON p.slug_id = s.id
-    JOIN trader t ON p.trader_id = t.id
-    ORDER BY p.id
-  `;
-  const [rows] = await pool.query(query);
-  return rows;
-};
 
 // Get products by slug name (category)
 export const getProductsBySlug = async (slugName) => {
@@ -123,10 +99,10 @@ export const getProductsBySlug = async (slugName) => {
     JOIN slug s ON p.slug_id = s.id
     JOIN child_category c ON s.child_category_id = c.id
     JOIN trader t ON p.trader_id = t.id
-    WHERE p.trader_id = ?
+    WHERE s.name = ? OR LOWER(REPLACE(s.name, ' ', '-')) = ?
     ORDER BY p.id DESC;
   `;
-  const [rows] = await pool.query(sql, [trader_id]);
+  const [rows] = await pool.query(query, [slugName, slugName.toLowerCase()]);
   return rows;
 };
 
@@ -165,5 +141,3 @@ export const getAllSlugs = async () => {
   const [rows] = await pool.query(query);
   return rows;
 };
-
->>>>>>> origin/krutarth-dev

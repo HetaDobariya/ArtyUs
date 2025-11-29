@@ -1,7 +1,16 @@
 import express from 'express';
 import { verifyToken } from '../middleware/verifytoken.js';
-import { addProduct, getAllProducts, getProductsByTraderId, updateProduct, deleteProduct } from '../controller/productcontroller.js';
-
+import { 
+  addProduct, 
+  getAllProducts, 
+  getProductsByTraderId, 
+  updateProduct, 
+  deleteProduct,
+  getProducts, 
+  getProductsByCategory, 
+  getProduct, 
+  getCategories 
+} from '../controller/productcontroller.js';
 
 const router = express.Router();
 
@@ -12,14 +21,6 @@ router.get('/my-products', verifyToken,getProductsByTraderId);
 
 router.put("/update/:id", updateProduct);
 router.delete("/delete/:id", deleteProduct);
-
-
-import { 
-  getProducts, 
-  getProductsByCategory, 
-  getProduct, 
-  getCategories 
-} from '../controller/productcontroller.js';
 
 
 
