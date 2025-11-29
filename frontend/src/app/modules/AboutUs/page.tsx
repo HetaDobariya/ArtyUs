@@ -13,7 +13,7 @@ const AboutUs = () => {
                     </h1>
                     <h2 className="mt-8 text-2xl font-semibold leading-7 text-gray-800">Our Story</h2>
                     <p className="mt-4 gap-y-6 font-normal text-lg leading-6 text-gray-700">
-                        Welcome to **ArtyUs**, the ultimate destination for all things art, craft, and stationery. We are more than just an ecommerce platform; we are a vibrant community of artists, crafters, and enthusiasts who share a passion for creativity. Our idea was to create a space where creators of all levels could find the finest quality art supplies, unique craft materials, and stylish stationery products.
+                        Welcome to <b>ArtyUS</b>, the ultimate destination for all things art, craft, and stationery. We are more than just an ecommerce platform; we are a vibrant community of artists, crafters, and enthusiasts who share a passion for creativity. Our idea was to create a space where creators of all levels could find the finest quality art supplies, unique craft materials, and stylish stationery products.
                     </p>
                     <p className="mt-4 gap-y-6 font-normal text-lg leading-6 text-gray-700">
                         Our mission is to empower creativity. We believe that art, craft, and stationery are not just products; they are tools of self-expression and catalysts for personal growth. They are the building blocks of imagination, the brushes that color our world, and the tools that turn ordinary moments into extraordinary memories.

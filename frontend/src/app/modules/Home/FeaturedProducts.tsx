@@ -1,0 +1,179 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+
+interface Product {
+    id: number;
+    product_name: string;
+    price: number;
+    image_url: string;
+    slug_name: string;
+    child_category_name: string;
+    trader_name: string;
+    qty: number;
+    description: string;
+}
+
+async function fetchProducts(): Promise<Product[]> {
+    try {
+        const productsUrl = `${process.env.NEXT_PUBLIC_BACKEND}/product/getproducts`;
+
+        const response = await fetch(productsUrl, {
+            credentials: 'include',
+            cache: 'no-store' // Prevent caching issues
+        });
+
+        console.log('API Response status:', response.status);
+        console.log('API Response headers:', response.headers);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('Full API response:', result);
+
+        let productArray: Product[] = [];
+
+        // Check the actual structure of your API response
+        if (result && result.success && Array.isArray(result.data)) {
+            productArray = result.data;
+            console.log('Found products in result.data:', productArray.length);
+        } else if (Array.isArray(result)) {
+            productArray = result;
+            console.log('Found products in root array:', productArray.length);
+        } else if (result && Array.isArray(result.products)) {
+            productArray = result.products;
+            console.log('Found products in result.products:', productArray.length);
+        } else {
+            console.log("API returned object that did not contain a product array. Structure:", Object.keys(result));
+            return [];
+        }
+
+        console.log("Fetched product array:", productArray);
+
+        if (productArray.length === 0) {
+            console.log("No products available to display.");
+            return [];
+        }
+
+        // Get last 5 products (most recent)
+        return productArray.slice(0,5).reverse(); // Reverse to show newest first
+
+    } catch (error) {
+        console.error("Failed to fetch featured products:", error);
+        return [];
+    }
+}
+
+const FeaturedProducts: React.FC = () => {
+    const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        async function loadProducts() {
+            try {
+                setLoading(true);
+                setError(null);
+                const products = await fetchProducts();
+                setFeaturedProducts(products);
+            } catch (err) {
+                setError('Failed to load featured products');
+                console.error('Error loading products:', err);
+            } finally {
+                setLoading(false);
+            }
+        }
+        loadProducts();
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="container mx-auto px-4 py-12">
+                <h2 className="text-2xl font-bold mb-8">Featured Products</h2>
+                <div className="text-center py-10 text-gray-600">
+                    Loading featured products...
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="container mx-auto px-4 py-12">
+                <h2 className="text-2xl font-bold mb-8">Featured Products</h2>
+                <div className="text-center py-10 text-gray-500">
+                    {error}
+                </div>
+            </div>
+        );
+    }
+
+    if (featuredProducts.length === 0) {
+        return (
+            <div className="container mx-auto px-4 py-12">
+                <h2 className="text-2xl font-bold mb-8">Featured Products</h2>
+                <div className="text-center py-10 text-gray-500">
+                    No featured products found.
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="container mx-auto px-4 py-12">
+            <h2 className="text-2xl font-bold mb-8">Latest Products</h2>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+                {featuredProducts.map((product) => (
+                    <Link 
+                        href={`/product/${product.id}`} 
+                        key={product.id} 
+                        className="block group"
+                    >
+                        <div className="relative border border-gray-200 rounded-lg p-4 transition-shadow duration-300 hover:shadow-xl h-full flex flex-col justify-between bg-white">
+                            {/* Product Image Container */}
+                            <div className="w-full h-48 mb-4 flex items-center justify-center bg-gray-50 rounded-md overflow-hidden">
+                                {product.image_url ? (
+                                    <Image
+                                        src={product.image_url}
+                                        alt={product.product_name}
+                                        width={200}
+                                        height={200}
+                                        className="object-contain max-h-48 transition-transform duration-500 group-hover:scale-105"
+                                        style={{ width: 'auto', height: 'auto' }} // Fix for aspect ratio warning
+                                        onError={(e) => {
+                                            // Fallback if image fails to load
+                                            (e.target as HTMLImageElement).src = '/api/placeholder/200/200';
+                                        }}
+                                    />
+                                ) : (
+                                    <div className="text-gray-400 flex items-center justify-center h-full">
+                                        No Image
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Product Details */}
+                            <div className="text-center mt-2 flex-grow">
+                                <p className="text-sm font-medium text-gray-700 line-clamp-2 mb-2">
+                                    {product.product_name}
+                                </p>
+                                <p className="text-md font-semibold text-gray-900">
+                                    Rs. {product.price.toFixed(2)}
+                                </p>
+                                <p className="text-xs text-gray-500 mt-1">
+                                    {product.trader_name}
+                                </p>
+                            </div>
+                        </div>
+                    </Link>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+export default FeaturedProducts;
