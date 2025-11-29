@@ -4,6 +4,9 @@ import {
   createServiceProvider,
   verifyServiceProviderById,
   getUnverifiedServiceProviderList,
+  getAllServiceProvidersFromDB,
+  getServiceProviderByIdFromDB,
+  getServiceProviderByUserIdFromDB
 } from '../models/serviceprovidermodel.js';
 import bcrypt from 'bcrypt';
 
@@ -115,3 +118,69 @@ export const getUnverifiedServiceProviders = async (req, res) => {
 };
 
 
+export const getAllServiceProviders = async (req, res) => {
+  try {
+    const providers = await getAllServiceProvidersFromDB();
+
+    if (!providers.length) {
+      return res.status(404).json({ message: 'No service providers found' });
+    }
+
+    res.status(200).json({
+      success: true,
+      count: providers.length,
+      data: providers,
+    });
+  } catch (error) {
+    console.error('Fetch all service providers error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const getServiceProviderById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ error: 'Service Provider ID required' });
+    }
+
+    const provider = await getServiceProviderByIdFromDB(id);
+
+    if (!provider) {
+      return res.status(404).json({ error: 'Service Provider not found' });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: provider,
+    });
+  } catch (error) {
+    console.error('Fetch service provider by ID error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const getServiceProviderByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID required' });
+    }
+
+    const provider = await getServiceProviderByUserIdFromDB(userId);
+
+    if (!provider) {
+      return res.status(404).json({ error: 'Service Provider not found' });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: provider,
+    });
+  } catch (error) {
+    console.error('Fetch service provider by User ID error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

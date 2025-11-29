@@ -62,3 +62,77 @@ export const getUnverifiedServiceProviderList = async () => {
   const [rows] = await pool.query(sql);
   return rows;
 };
+
+
+export const getAllServiceProvidersFromDB = async () => {
+  const sql = `
+    SELECT 
+      u.id AS user_id,
+      u.name AS user_name,
+      u.email,
+      u.contact AS user_contact,
+      u.address AS user_address,
+      u.is_verified,
+      u.created_at,
+      s.id AS service_provider_id,
+      s.service_name,
+      s.shop_name,
+      s.service_address,
+      s.description,
+      s.contact AS service_contact
+    FROM user u
+    JOIN service_provider s ON u.id = s.user_id
+    WHERE u.is_serviceprovider = 1
+    ORDER BY s.id DESC;
+  `;
+  const [rows] = await pool.query(sql);
+  return rows;
+};
+
+export const getServiceProviderByIdFromDB = async (serviceProviderId) => {
+  const sql = `
+    SELECT 
+      u.id AS user_id,
+      u.name AS user_name,
+      u.email,
+      u.contact AS user_contact,
+      u.address AS user_address,
+      u.is_verified,
+      u.created_at,
+      s.id AS service_provider_id,
+      s.service_name,
+      s.shop_name,
+      s.service_address,
+      s.description,
+      s.contact AS service_contact
+    FROM user u
+    JOIN service_provider s ON u.id = s.user_id
+    WHERE s.id = ? AND u.is_serviceprovider = 1;
+  `;
+  const [rows] = await pool.query(sql, [serviceProviderId]);
+  return rows[0];
+};
+
+export const getServiceProviderByUserIdFromDB = async (userId) => {
+  const sql = `
+    SELECT 
+      u.id AS user_id,
+      u.name AS user_name,
+      u.email,
+      u.contact AS user_contact,
+      u.address AS user_address,
+      u.is_verified,
+      u.created_at,
+      s.id AS service_provider_id,
+      s.service_name,
+      s.shop_name,
+      s.service_address,
+      s.description,
+      s.contact AS service_contact
+    FROM user u
+    JOIN service_provider s ON u.id = s.user_id
+    WHERE u.id = ? AND u.is_serviceprovider = 1;
+  `;
+  const [rows] = await pool.query(sql, [userId]);
+  return rows[0];
+};
