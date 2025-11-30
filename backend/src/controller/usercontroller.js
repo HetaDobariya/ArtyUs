@@ -170,9 +170,9 @@ export const updateUser = async (req, res) => {
 export const logout = async (req, res) => {
   try {
     res.clearCookie('token', {
-      httpOnly: false, // match with how you set it
-      secure: false,   // true in production (HTTPS)
-      sameSite: 'Lax',
+      httpOnly: true, // match with how you set it
+      secure: true,   // true in production (HTTPS)
+      sameSite: 'None',
     });
 
     res.status(200).json({ message: 'Logout successful' });
