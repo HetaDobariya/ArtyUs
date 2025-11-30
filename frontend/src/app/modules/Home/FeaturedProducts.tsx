@@ -113,11 +113,11 @@ const FeaturedProducts: React.FC = () => {
                             <div className="w-full h-48 mb-4 flex items-center justify-center bg-gray-50 rounded-md">
                                 {product.image_url ? (
                                     <Image
-                                        src={product.image_url} // Use the correct column name
+                                        src={product.image_url}
                                         alt={product.product_name}
                                         width={200}
                                         height={200}
-                                        className="object-contain max-h-48 transition-transform duration-500 group-hover:scale-105"
+                                        className="object-contain max-h-48 w-auto transition-transform duration-500 group-hover:scale-105"
                                     />
                                 ) : (
                                     <div className="text-gray-400">No Image</div>

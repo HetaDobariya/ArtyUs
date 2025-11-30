@@ -123,13 +123,27 @@ export default function ServiceProviderSignUp() {
             console.log('Submitting data:', submissionData);
 
             // Send data to backend
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/serviceprovider/signup`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/serviceprovider/signup`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(submissionData),
+                credentials: 'include',
             });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                let errorData;
+                try {
+                    errorData = JSON.parse(errorText);
+                } catch {
+                    errorData = { message: `Server error: ${response.status}` };
+                }
+                console.error("Service provider signup failed:", errorData);
+                alert(errorData.message || errorData.error || 'Signup failed!');
+                return;
+            }
 
             const data = await response.json();
 

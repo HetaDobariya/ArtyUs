@@ -7,7 +7,7 @@ interface User {
   id: string;
   name: string;
   email: string;
-  role: 'user' | 'trader';
+  role: 'user' | 'trader' | 'serviceprovider' | 'service_provider' | 'admin';
   avatar?: string;
 }
 

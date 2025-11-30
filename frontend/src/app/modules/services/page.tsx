@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useUser } from '@/contexts/UserContext';
+import AddServiceModal from '../dashboard/sp/AddServiceModal';
 
 // --- Icon ---
 // A simple icon for the "Shop Name"
@@ -28,32 +30,29 @@ const StoreIcon = ({ size = 20, className = "" }: { size?: number; className?: s
 // --- Data Interface ---
 interface Service {
     id: string;
-    serviceName: string;
-    shopName: string;
+    name: string;
     description: string;
-}
-
-// --- Backend API Response Interface ---
-interface BackendServiceProvider {
-    user_id: number;
-    user_name: string;
-    email: string;
-    user_address: string;
-    user_contact: string;
-    is_verified: number;
-    service_provider_id: number;
-    service_name: string;
+    price: number;
+    image_url?: string;
     shop_name: string;
-    service_address: string;
-    service_contact: string;
-    description: string;
+    service_name: string;
 }
 
 // --- Page Component ---
 const ServicesPage: React.FC = () => {
+    const { user } = useUser();
     const [services, setServices] = useState<Service[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [showAddModal, setShowAddModal] = useState<boolean>(false);
+
+    // Check if user is a service provider
+    const isServiceProvider = user?.role?.toLowerCase() === 'serviceprovider' || user?.role?.toLowerCase() === 'service_provider';
+
+    const handleServiceAdded = () => {
+        // Refresh the services list after adding
+        window.location.reload();
+    };
 
     useEffect(() => {
         const fetchServices = async () => {
@@ -61,45 +60,22 @@ const ServicesPage: React.FC = () => {
                 setLoading(true);
                 setError(null);
 
-                const apiUrl = `${process.env.NEXT_PUBLIC_BACKEND}/api/admin/serviceprovider-details`;
+                const apiUrl = `${process.env.NEXT_PUBLIC_BACKEND}/api/service/all`;
                 const response = await fetch(apiUrl, {
                     credentials: 'include',
                 });
-
-                // Handle 404 as empty result (no service providers)
-                if (response.status === 404) {
-                    setServices([]);
-                    setLoading(false);
-                    return;
-                }
 
                 if (!response.ok) {
                     throw new Error(`Failed to fetch services: ${response.status}`);
                 }
 
                 const result = await response.json();
-                
-                // Handle different response structures
-                let serviceProviders: BackendServiceProvider[] = [];
-                if (result.data && Array.isArray(result.data)) {
-                    serviceProviders = result.data;
-                } else if (Array.isArray(result)) {
-                    serviceProviders = result;
+
+                if (result.success && Array.isArray(result.data)) {
+                    setServices(result.data);
                 } else {
-                    throw new Error('Unexpected API response format');
+                    setServices([]);
                 }
-
-                // Filter only verified service providers and map to Service interface
-                const mappedServices: Service[] = serviceProviders
-                    .filter((provider) => provider.is_verified === 1)
-                    .map((provider) => ({
-                        id: provider.service_provider_id.toString(),
-                        serviceName: provider.service_name || 'Service',
-                        shopName: provider.shop_name || 'Shop',
-                        description: provider.description || 'No description available.',
-                    }));
-
-                setServices(mappedServices);
             } catch (err) {
                 console.error('Error fetching services:', err);
                 setError(err instanceof Error ? err.message : 'Failed to load services');
@@ -121,9 +97,19 @@ const ServicesPage: React.FC = () => {
             {/* Header */}
             <header className="bg-white shadow-sm">
                 <div className="container mx-auto px-6 py-4">
-                    <h1 className="text-3xl font-bold text-gray-800">
-                        Art & Craft Services
-                    </h1>
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <h1 className="text-3xl font-bold text-gray-800">
+                            Art & Craft Services
+                        </h1>
+                        {isServiceProvider && (
+                            <button
+                                onClick={() => setShowAddModal(true)}
+                                className="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors duration-200 font-semibold text-base whitespace-nowrap shadow-md hover:shadow-lg"
+                            >
+                                + Add Service
+                            </button>
+                        )}
+                    </div>
                 </div>
             </header>
 
@@ -165,42 +151,56 @@ const ServicesPage: React.FC = () => {
                 {!loading && !error && services.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {services.map((service) => (
-                            <Link
+                            <div
                                 key={service.id}
-                                href={`/modules/services/${service.id}`}
-                                passHref
-                                legacyBehavior
+                                className="flex flex-col bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden"
                             >
-                                <a className="flex flex-col bg-white rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1 overflow-hidden p-6">
-                                    {/* Card Content */}
-                                    <div className="flex-1 flex flex-col">
-                                        {/* Service Name */}
-                                        <h2 className="text-xl font-bold text-gray-800 mb-2">
-                                            {service.serviceName}
-                                        </h2>
+                                {/* Card Content */}
+                                <div className="flex-1 flex flex-col p-6">
+                                    {/* Service Name */}
+                                    <h2 className="text-lg font-bold text-gray-900 mb-3">
+                                        {service.name}
+                                    </h2>
 
-                                        {/* Shop Name */}
-                                        <div className="flex items-center text-gray-600 mb-4">
-                                            <StoreIcon className="w-5 h-5 mr-2 flex-shrink-0" />
-                                            <span className="text-sm font-medium">{service.shopName}</span>
-                                        </div>
-
-                                        {/* Description */}
-                                        <p className="text-sm text-gray-700 leading-relaxed flex-1 line-clamp-3">
-                                            {service.description}
-                                        </p>
-
-                                        {/* Click Affordance */}
-                                        <div className="text-right mt-5 text-sm font-semibold text-black">
-                                            View Details &rarr;
-                                        </div>
+                                    {/* Shop Name */}
+                                    <div className="flex items-center text-gray-600 mb-4">
+                                        <StoreIcon className="w-4 h-4 mr-2 flex-shrink-0" />
+                                        <span className="text-sm font-medium">{service.shop_name}</span>
                                     </div>
-                                </a>
-                            </Link>
+
+                                    {/* Price */}
+                                    {service.price && (
+                                        <p className="text-gray-900 font-bold mb-2">₹{service.price}</p>
+                                    )}
+
+                                    {/* Description */}
+                                    <p className="text-sm text-gray-700 leading-relaxed flex-1 mb-4 line-clamp-3">
+                                        {service.description}
+                                    </p>
+
+                                    {/* View Details Button */}
+                                    <Link
+                                        href={`/modules/services/${service.id}`}
+                                        className="inline-block w-full text-center mt-auto"
+                                    >
+                                        <button className="w-full px-4 py-2 bg-black text-white text-sm font-semibold rounded-md hover:bg-gray-800 transition-colors duration-200">
+                                            View Details
+                                        </button>
+                                    </Link>
+                                </div>
+                            </div>
                         ))}
                     </div>
                 )}
             </main>
+
+            {/* Add Service Modal for Service Providers */}
+            {showAddModal && isServiceProvider && (
+                <AddServiceModal
+                    onClose={() => setShowAddModal(false)}
+                    onAdded={handleServiceAdded}
+                />
+            )}
         </div>
     );
 };

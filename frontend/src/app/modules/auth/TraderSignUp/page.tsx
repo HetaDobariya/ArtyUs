@@ -67,7 +67,7 @@ export default function TraderSignUp() {
         console.log('Final Form Data:', formData);
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/trader/signup`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/trader/signup`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -75,6 +75,19 @@ export default function TraderSignUp() {
                 body: JSON.stringify(formData),
                 credentials: 'include'
             });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                let errorData;
+                try {
+                    errorData = JSON.parse(errorText);
+                } catch {
+                    errorData = { message: `Server error: ${response.status}` };
+                }
+                console.error("Trader signup failed:", errorData);
+                alert(errorData.message || errorData.error || 'Signup failed!');
+                return;
+            }
 
             const data = await response.json();
             if (response.ok) {

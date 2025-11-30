@@ -22,7 +22,7 @@ export default function SignIn() {
     setErrorMsg('');
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/login`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/user/login`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -34,8 +34,14 @@ export default function SignIn() {
         await refetchUser();
         router.push('/'); // Redirect to home page
       } else {
-        const data = await res.json();
-        setErrorMsg(data.message || 'Invalid email or password!');
+        const errorText = await res.text();
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { message: 'Invalid email or password!' };
+        }
+        setErrorMsg(errorData.message || errorData.error || 'Invalid email or password!');
       }
     } catch (error) {
       console.error('Login error:', error);

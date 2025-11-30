@@ -22,8 +22,6 @@ router.get('/my-products', verifyToken,getProductsByTraderId);
 router.put("/update/:id", updateProduct);
 router.delete("/delete/:id", deleteProduct);
 
-
-
 // Get all categories
 router.get('/categories', getCategories);
 

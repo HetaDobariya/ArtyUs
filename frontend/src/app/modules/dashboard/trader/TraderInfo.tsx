@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image1 from '../../../../../public/image/HomeImages/trader.png';
 import EditTraderDetails from './EditTraderDetails';
 import TraderDashboard from './TraderDashboard';
+import Sidebar from '@/components/Sidebar';
 
 interface TraderData {
   id: string;
@@ -59,7 +60,7 @@ const TraderInfo = () => {
     const fetchTraderData = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/current-user`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/user/current-user`, {
           method: 'GET',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
@@ -68,6 +69,11 @@ const TraderInfo = () => {
         const data = await response.json();
         if (!response.ok) {
           setError(data.message || 'Failed to load trader data.');
+          return;
+        }
+        // Check if user is null (not authenticated)
+        if (!data.user && data.message) {
+          setError(data.message);
           return;
         }
         setTraderData(data.user);
@@ -110,8 +116,16 @@ const TraderInfo = () => {
 
   if (error || !traderData)
     return (
-      <div className="flex justify-center items-center h-screen">
-        <p className="text-red-600">{error || 'Trader data not available.'}</p>
+      <div className="flex flex-col justify-center items-center h-screen gap-4">
+        <p className="text-red-600 text-lg font-semibold">{error || 'Trader data not available.'}</p>
+        {error && error.includes('login') && (
+          <a
+            href="/modules/auth/SignIn"
+            className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-200"
+          >
+            Go to Login Page
+          </a>
+        )}
       </div>
     );
 
@@ -119,42 +133,14 @@ const TraderInfo = () => {
 
   return (
     <div className="flex min-h-screen bg-white my-10 mx-20 gap-12">
-      {/* 🔹 Sidebar */}
-      <div className="bg-gray-100 p-6 rounded-2xl shadow-md flex flex-col w-64 h-max">
-        <h2 className="text-xl font-bold mb-6 text-gray-800 text-center">My Account</h2>
+      {/* Sidebar */}
+      <Sidebar
+        selectedTab={selectedTab}
+        onTabSelect={setSelectedTab}
+        userRole={traderData.role}
+      />
 
-        <button
-          onClick={() => setSelectedTab('profile')}
-          className={`text-left px-4 py-3 rounded-lg font-medium mb-2 transition-colors duration-200 ${
-            selectedTab === 'profile' ? 'bg-black text-white' : 'text-gray-700 hover:bg-gray-200'
-          }`}
-        >
-          Profile
-        </button>
-
-        <button
-          onClick={() => setSelectedTab('orders')}
-          className={`text-left px-4 py-3 rounded-lg font-medium mb-2 transition-colors duration-200 ${
-            selectedTab === 'orders' ? 'bg-black text-white' : 'text-gray-700 hover:bg-gray-200'
-          }`}
-        >
-          Orders
-        </button>
-
-        {/* Dashboard visible only for traders */}
-        {traderData.role === 'trader' && (
-          <button
-            onClick={() => setSelectedTab('dashboard')}
-            className={`text-left px-4 py-3 rounded-lg font-medium mb-2 transition-colors duration-200 ${
-              selectedTab === 'dashboard' ? 'bg-black text-white' : 'text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            Dashboard
-          </button>
-        )}
-      </div>
-
-      {/* 🔹 Right Section */}
+      {/* Main Content */}
       <div className="flex-1 transition-all duration-300">
         {selectedTab === 'profile' ? (
           <div className="flex flex-row gap-12 items-start">
@@ -206,7 +192,6 @@ const TraderInfo = () => {
             <h3 className="text-3xl font-bold text-gray-800 mb-8 pb-2 border-b-2 border-gray-300">
               My Orders
             </h3>
-
             <table className="min-w-full text-left border border-gray-200 rounded-lg">
               <thead className="bg-gray-100">
                 <tr>
@@ -234,7 +219,7 @@ const TraderInfo = () => {
           </div>
         ) : (
           <div className="bg-white p-8 rounded-lg shadow-md">
-           <TraderDashboard />
+            <TraderDashboard />
           </div>
         )}
       </div>
