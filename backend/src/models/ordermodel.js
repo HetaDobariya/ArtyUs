@@ -21,9 +21,9 @@ export const placeOrderModel = async (data) => {
       // Format: "actual_address|GROUP:timestamp"
       const addressWithGroup = `${address}|GROUP:${orderGroupId}`;
       const [orderResult] = await connection.query(
-        `INSERT INTO orders (user_id, product_id, contact, price, qty, address, staus) 
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [user_id, item.product_id, contact, item.price, item.qty, addressWithGroup, 'pending']
+        `INSERT INTO orders (user_id, product_id, contact, price, qty, address) 
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [user_id, item.product_id, contact, item.price, item.qty, addressWithGroup]
       );
 
       // Update product stock
@@ -72,7 +72,6 @@ export const getUserOrdersModel = async (user_id) => {
       (o.price * o.qty) as total_amount,
       o.contact,
       o.address,
-      o.staus as status,
       t.shop_name as trader_name,
       s.name as category
     FROM orders o
@@ -108,7 +107,6 @@ export const getUserOrdersModel = async (user_id) => {
         order_id: row.id, // Use first order ID as the main order ID
         contact: row.contact,
         address: row.address,
-        status: row.status || 'pending',
         items: []
       });
     }
@@ -129,7 +127,6 @@ export const getUserOrdersModel = async (user_id) => {
     order_group_id: group.order_group_id,
     contact: group.contact,
     address: group.address,
-    status: (group.status || 'pending').toLowerCase(),
     items: group.items,
     total: group.items.reduce((sum, item) => sum + item.total, 0),
     item_count: group.items.length
@@ -139,7 +136,7 @@ export const getUserOrdersModel = async (user_id) => {
 export const getOrderByIdModel = async (orderId, user_id) => {
   // First get the order to find its group ID
   const orderQuery = `
-    SELECT id, address, contact, staus as status
+    SELECT id, address, contact
     FROM orders
     WHERE id = ? AND user_id = ?
   `;
@@ -174,7 +171,6 @@ export const getOrderByIdModel = async (orderId, user_id) => {
         (o.price * o.qty) as total_amount,
         o.contact,
         o.address,
-        o.staus as status,
         t.shop_name as trader_name,
         s.name as category,
         p.description
@@ -198,7 +194,6 @@ export const getOrderByIdModel = async (orderId, user_id) => {
         (o.price * o.qty) as total_amount,
         o.contact,
         o.address,
-        o.staus as status,
         t.shop_name as trader_name,
         s.name as category,
         p.description
@@ -224,7 +219,6 @@ export const getOrderByIdModel = async (orderId, user_id) => {
     order_group_id: orderGroupId,
     contact: order.contact,
     address: cleanAddress,
-    status: order.status || 'pending',
     items: rows.map(row => ({
       id: row.id,
       product_id: row.product_id,

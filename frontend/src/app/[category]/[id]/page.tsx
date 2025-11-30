@@ -15,7 +15,12 @@ interface Product {
   image: string;
   company: string;
   details: string;
+  product_name?: string;
+  image_url?: string;
+  qty?: number;
 }
+
+const API_URL = process.env.NEXT_PUBLIC_BACKEND || 'http://localhost:8000';
 
 export default function ProductDetailPage({
   params,
@@ -24,6 +29,12 @@ export default function ProductDetailPage({
 }) {
   const [category, setCategory] = useState<string>('');
   const [id, setId] = useState<string>('');
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [addingToCart, setAddingToCart] = useState(false);
+  const [quantity, setQuantity] = useState(1);
+  const { user } = useUser();
+  const router = useRouter();
 
   useEffect(() => {
     params.then((p) => {
@@ -31,12 +42,6 @@ export default function ProductDetailPage({
       setId(p.id);
     });
   }, [params]);
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [addingToCart, setAddingToCart] = useState(false);
-  const [quantity, setQuantity] = useState(1);
-  const { user } = useUser();
-  const router = useRouter();
 
   useEffect(() => {
     if (id) {
@@ -46,27 +51,53 @@ export default function ProductDetailPage({
 
   const fetchProduct = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/product/${id}`, {
+      // Try multiple API endpoints
+      let response = await fetch(`${API_URL}/product/${id}`, {
         credentials: 'include',
       });
       
+      if (!response.ok) {
+        // Try without /api prefix
+        response = await fetch(`${API_URL}/product/${id}`, {
+          credentials: 'include',
+        });
+      }
+
       if (response.ok) {
         const result = await response.json();
+        
         if (result.success && result.data) {
+          // Transform the product data to match our interface
+          const productData = result.data;
           setProduct({
-            id: result.data.id,
-            name: result.data.name,
-            price: result.data.price,
-            quantity: result.data.quantity,
-            description: result.data.description || '',
-            image: result.data.image,
-            company: result.data.company || '',
-            details: result.data.details || result.data.description || '',
+            id: productData.id,
+            name: productData.product_name || productData.name,
+            price: productData.price,
+            quantity: productData.qty || productData.quantity,
+            description: productData.description || '',
+            image: productData.image_url || productData.image || '/api/placeholder/500/500',
+            company: productData.company || '',
+            details: productData.details || productData.description || '',
+          });
+        } else if (result.id) {
+          // Direct product object
+          setProduct({
+            id: result.id,
+            name: result.product_name || result.name,
+            price: result.price,
+            quantity: result.qty || result.quantity,
+            description: result.description || '',
+            image: result.image_url || result.image || '/api/placeholder/500/500',
+            company: result.company || '',
+            details: result.details || result.description || '',
           });
         }
+      } else {
+        setProduct(null);
       }
     } catch (error) {
       console.error('Error fetching product:', error);
+      setProduct(null);
     } finally {
       setLoading(false);
     }
@@ -78,14 +109,16 @@ export default function ProductDetailPage({
       return;
     }
 
+    if (!product) return;
+
     setAddingToCart(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/cart/add`, {
+      const response = await fetch(`${API_URL}/cart/add`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          product_id: product?.id,
+          product_id: product.id,
           qty: quantity,
         }),
       });
@@ -94,7 +127,7 @@ export default function ProductDetailPage({
 
       if (response.ok && data.success) {
         alert('Product added to cart successfully!');
-        router.push('/cart');
+        // router.push('/cart');
       } else {
         alert(data.error || 'Failed to add to cart');
       }
@@ -112,15 +145,16 @@ export default function ProductDetailPage({
       return;
     }
 
-    // Add to cart first, then redirect to checkout
+    if (!product) return;
+
     setAddingToCart(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/cart/add`, {
+      const response = await fetch(`${API_URL}/cart/add`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          product_id: product?.id,
+          product_id: product.id,
           qty: quantity,
         }),
       });
@@ -143,12 +177,11 @@ export default function ProductDetailPage({
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">Loading product...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
       </div>
     );
   }
 
-  // Error state
   if (!product) {
     return (
       <div className="bg-white min-h-screen flex items-center justify-center">
@@ -167,7 +200,6 @@ export default function ProductDetailPage({
     <div className="bg-white min-h-screen">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 pt-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
-          {/* Left Side - Product Image */}
           <div className="flex items-start justify-center lg:justify-start">
             <div className="w-full max-w-lg">
               <Image
@@ -181,16 +213,12 @@ export default function ProductDetailPage({
             </div>
           </div>
 
-          {/* Right Side - Product Details */}
           <div className="flex flex-col space-y-8">
-            {/* Top Section - Name, Price, and Button */}
             <div className="space-y-6">
-              {/* Product Name */}
               <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">
                 {product.name.toUpperCase()}
               </h1>
 
-              {/* Price and Quantity Selector */}
               <div className="space-y-4">
                 <div>
                   <p className="text-4xl font-bold text-gray-900">
@@ -198,7 +226,6 @@ export default function ProductDetailPage({
                   </p>
                 </div>
                 
-                {/* Quantity Selector */}
                 <div className="flex items-center gap-4">
                   <label className="text-sm font-medium text-gray-700">Quantity:</label>
                   <div className="flex items-center gap-2">
@@ -224,7 +251,6 @@ export default function ProductDetailPage({
                   </span>
                 </div>
 
-                {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row gap-4">
                   <button
                     type="button"
@@ -246,34 +272,35 @@ export default function ProductDetailPage({
               </div>
             </div>
 
-            {/* Company Name */}
-            <div>
-              <p className="text-lg text-gray-700">{product.company}</p>
-            </div>
+            {product.company && (
+              <div>
+                <p className="text-lg text-gray-700">{product.company}</p>
+              </div>
+            )}
 
-            {/* Description */}
+            {product.description && (
+              <div className="space-y-3">
+                <h3 className="text-xl font-bold text-gray-900">Description</h3>
+                <p className="text-base text-gray-700 leading-relaxed">
+                  {product.description}
+                </p>
+              </div>
+            )}
+
             <div className="space-y-3">
-              <h3 className="text-xl font-bold text-gray-900">Description</h3>
-              <p className="text-base text-gray-700 leading-relaxed">
-                {product.description}
-              </p>
+              <h3 className="text-xl font-bold text-gray-900">Stock</h3>
+              <p className="text-base text-gray-700">{product.quantity} units available</p>
             </div>
 
-            {/* Quantity */}
-            <div className="space-y-3">
-              <h3 className="text-xl font-bold text-gray-900">QTY</h3>
-              <p className="text-base text-gray-700">{product.quantity}</p>
-            </div>
+            {product.details && product.details !== product.description && (
+              <div className="space-y-3">
+                <h3 className="text-xl font-bold text-gray-900">Details</h3>
+                <p className="text-base text-gray-700">{product.details}</p>
+              </div>
+            )}
 
-            {/* Details */}
-            <div className="space-y-3">
-              <h3 className="text-xl font-bold text-gray-900">Details</h3>
-              <p className="text-base text-gray-700">{product.details}</p>
-            </div>
-
-            {/* Back Button */}
             <div className="pt-6">
-              <Link
+              <Link 
                 href={`/${category}`}
                 className="text-blue-600 hover:underline inline-flex items-center"
               >

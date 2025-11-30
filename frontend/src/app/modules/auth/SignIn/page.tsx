@@ -22,7 +22,7 @@ export default function SignIn() {
     setErrorMsg('');
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/user/login`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/login`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

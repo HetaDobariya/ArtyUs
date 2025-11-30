@@ -5,9 +5,11 @@ import {
   getUnverifiedServiceProviders,
   getAllServiceProviders,
   getServiceProviderById,
-  getServiceProviderByUserId
+  getServiceProviderByUserId,
+  getServiceProviderOrders,
+  updateBookingStatus
 } from '../controller/serviceprovidercontroller.js';
-// import { verifyToken } from '../middleware/verifytoken.js';
+import { verifyToken } from '../middleware/verifytoken.js';
 
 const router = express.Router();
 
@@ -19,5 +21,8 @@ router.get("/service-details/unverified", getUnverifiedServiceProviders);
 router.get("/service-details/all", getAllServiceProviders);
 router.get("/service-details/provider/:id", getServiceProviderById);
 router.get("/service-details/user/:userId", getServiceProviderByUserId);
+
+router.get('/my-orders', verifyToken, getServiceProviderOrders);
+router.put('/update-status/:bookingId', verifyToken, updateBookingStatus);
 
 export default router;

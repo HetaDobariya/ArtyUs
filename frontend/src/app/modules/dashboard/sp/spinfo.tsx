@@ -60,7 +60,7 @@ const SPInfo = () => {
     const fetchSPData = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/user/current-user`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/current-user`, {
           method: 'GET',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },

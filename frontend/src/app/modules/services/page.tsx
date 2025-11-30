@@ -60,7 +60,7 @@ const ServicesPage: React.FC = () => {
                 setLoading(true);
                 setError(null);
 
-                const apiUrl = `${process.env.NEXT_PUBLIC_BACKEND}/api/service/all`;
+                const apiUrl = `${process.env.NEXT_PUBLIC_BACKEND}/service/all`;
                 const response = await fetch(apiUrl, {
                     credentials: 'include',
                 });

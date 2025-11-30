@@ -135,7 +135,7 @@ const ServiceDetailPage: React.FC = () => {
                 pdfUrl = formData.support_pdf.name;
             }
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/service-booking/book`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/service-booking/book`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
@@ -183,7 +183,7 @@ const ServiceDetailPage: React.FC = () => {
         }
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/service/delete/${serviceId}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/service/delete/${serviceId}`, {
                 method: 'DELETE',
                 credentials: 'include',
             });
@@ -213,7 +213,7 @@ const ServiceDetailPage: React.FC = () => {
                 setLoading(true);
                 setError(null);
 
-                const apiUrl = `${process.env.NEXT_PUBLIC_BACKEND}/api/service/details/${serviceId}`;
+                const apiUrl = `${process.env.NEXT_PUBLIC_BACKEND}/service/details/${serviceId}`;
                 const response = await fetch(apiUrl, {
                     credentials: 'include',
                 });

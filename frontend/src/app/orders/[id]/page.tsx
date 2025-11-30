@@ -56,7 +56,7 @@ export default function OrderDetailPage({
 
   const fetchOrder = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/orders/${orderId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/orders/${orderId}`, {
         method: 'GET',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

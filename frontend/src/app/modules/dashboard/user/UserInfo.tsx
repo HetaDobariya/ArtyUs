@@ -61,7 +61,7 @@ const UserInfo = () => {
     const fetchUserData = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/user/current-user`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/current-user`, {
           method: 'GET',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
@@ -107,7 +107,7 @@ const UserInfo = () => {
       
       setOrdersLoading(true);
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/orders/my-orders`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/orders/my-orders`, {
           method: 'GET',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },

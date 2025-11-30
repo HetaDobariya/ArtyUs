@@ -43,7 +43,7 @@ export default function AddServiceModal({ onClose, onAdded }: AddServiceModalPro
     setSubmitting(true);
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/service/add`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/service/add`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

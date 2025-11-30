@@ -30,7 +30,7 @@ export default function ServiceProviderDashboard() {
   const fetchServices = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/service/my-services`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/service/my-services`, {
         credentials: 'include',
         cache: 'no-store', // Prevent caching to ensure fresh data
       });
@@ -53,7 +53,7 @@ export default function ServiceProviderDashboard() {
     if (!confirm('Are you sure you want to delete this service?')) return;
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/service/delete/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/service/delete/${id}`, {
         method: 'DELETE',
         credentials: 'include',
       });

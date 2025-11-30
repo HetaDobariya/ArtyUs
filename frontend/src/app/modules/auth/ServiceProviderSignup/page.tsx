@@ -123,7 +123,7 @@ export default function ServiceProviderSignUp() {
             console.log('Submitting data:', submissionData);
 
             // Send data to backend
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/serviceprovider/signup`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/serviceprovider/signup`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -236,9 +236,9 @@ export default function Navigation() {
       try {
         setIsLoading(true);
 
-        const catUrl = `${process.env.NEXT_PUBLIC_BACKEND}/api/category/getCategory`;
-        const childCatUrl = `${process.env.NEXT_PUBLIC_BACKEND}/api/category/getChildCategory`;
-        const slugsUrl = `${process.env.NEXT_PUBLIC_BACKEND}/api/category/getslugs`;
+        const catUrl = `${process.env.NEXT_PUBLIC_BACKEND}/category/getCategory`;
+        const childCatUrl = `${process.env.NEXT_PUBLIC_BACKEND}/category/getChildCategory`;
+        const slugsUrl = `${process.env.NEXT_PUBLIC_BACKEND}/category/getslugs`;
 
         const [catRes, childCatRes, slugsRes] = await Promise.all([
           fetch(catUrl, { credentials: 'include' }),
@@ -315,7 +315,7 @@ export default function Navigation() {
 
   const handleLogout = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/user/logout`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/logout`, {
         method: 'POST',
         credentials: 'include',
       });

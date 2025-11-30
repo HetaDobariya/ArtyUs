@@ -46,7 +46,7 @@ export default function CheckoutPage() {
 
   const fetchUserDetails = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/user/current-user`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/current-user`, {
         method: 'GET',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -66,7 +66,7 @@ export default function CheckoutPage() {
 
   const fetchCartItems = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/cart/my-cart`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/cart/my-cart`, {
         method: 'GET',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -99,7 +99,7 @@ export default function CheckoutPage() {
 
     setPlacingOrder(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/orders/place-order`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/orders/place-order`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
