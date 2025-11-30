@@ -47,7 +47,6 @@ interface ServiceDetails {
     address: string;
     serviceProviderId?: number;
     price?: number;
-    price?: number;
     imageUrl?: string;
     providerUserId?: number;
 }
@@ -245,8 +244,6 @@ const ServiceDetailPage: React.FC = () => {
                     providerName: provider.user_name || 'Provider',
                     contactEmail: provider.email || 'No email available',
                     address: provider.service_address || provider.user_address || 'Address not available',
-                    serviceProviderId: provider.service_provider_id,
-                    price: provider.price ? parseFloat(provider.price) : undefined,
                     serviceProviderId: provider.service_provider_id,
                     price: provider.price ? parseFloat(provider.price) : undefined,
                     imageUrl: provider.image_url,
