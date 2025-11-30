@@ -25,7 +25,7 @@ export default function SignUp() {
         }
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/signup`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/user/signup`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -39,6 +39,19 @@ export default function SignUp() {
                 }),
                 credentials: 'include'
             });
+
+            if (!res.ok) {
+                const errorText = await res.text();
+                let errorData;
+                try {
+                    errorData = JSON.parse(errorText);
+                } catch {
+                    errorData = { message: `Server error: ${res.status}` };
+                }
+                console.error("Signup failed:", errorData);
+                alert(errorData.message || errorData.error || "Signup failed!");
+                return;
+            }
 
             const data = await res.json();
 

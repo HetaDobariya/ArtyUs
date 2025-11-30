@@ -32,7 +32,13 @@ function Footer() {
       <div className="mx-auto w-full max-w-7xl px-8">
         <div className="grid grid-cols-1 justify-between gap-4 md:grid-cols-2">
           <Link href="/">
-            <Image src="/Arty-US_logo.png" alt="Arty Us Logo" height={140} width={140} />
+            <Image 
+              src="/Arty-US_logo.png" 
+              alt="Arty Us Logo" 
+              height={140} 
+              width={140}
+              className="h-auto w-auto"
+            />
           </Link>
 
           <div className="grid grid-cols-3 justify-between gap-4">

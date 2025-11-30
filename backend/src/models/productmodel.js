@@ -59,7 +59,6 @@ export const deleteProductById = async (id) => {
   return result;
 };
 
-
 export const getProductsByTraderIdModel = async (trader_id) => {
   const sql = `
     SELECT 
@@ -99,10 +98,10 @@ export const getProductsBySlug = async (slugName) => {
     FROM product p
     JOIN slug s ON p.slug_id = s.id
     JOIN trader t ON p.trader_id = t.id
-    WHERE LOWER(REPLACE(s.name, ' ', '-')) = LOWER(?)
-    ORDER BY p.id
+    WHERE s.name = ? OR LOWER(REPLACE(s.name, ' ', '-')) = ?
+    ORDER BY p.id DESC;
   `;
-  const [rows] = await pool.query(query, [slugName]);
+  const [rows] = await pool.query(query, [slugName, slugName.toLowerCase()]);
   return rows;
 };
 
@@ -141,4 +140,3 @@ export const getAllSlugs = async () => {
   const [rows] = await pool.query(query);
   return rows;
 };
-

@@ -5,16 +5,35 @@ const API_URL = process.env.NEXT_PUBLIC_BACKEND || 'http://localhost:8000';
 
 async function getCategoryData(category: string) {
   try {
-    const response = await fetch(`${API_URL}/product/category/${category}`, {
+    const response = await fetch(`${API_URL}/api/product/category/${category}`, {
       cache: 'no-store', // Always fetch fresh data
+      credentials: 'include',
     });
     
     if (!response.ok) {
+      if (response.status === 404) {
+        return null; // Category not found
+      }
       return null;
     }
     
     const result = await response.json();
-    return result.success ? result.data : null;
+    // Backend returns { success: true, data: products[] }
+    // We need to format it for the component
+    if (result.success && Array.isArray(result.data) && result.data.length > 0) {
+      // Get category name from first product's child_category_name or use the slug
+      const categoryName = result.data[0]?.child_category_name || result.data[0]?.slug_name || category.replace(/-/g, ' ');
+      return {
+        title: categoryName,
+        products: result.data.map((product: any) => ({
+          id: product.id,
+          name: product.product_name || product.name,
+          price: product.price,
+          image: product.image_url || product.image,
+        }))
+      };
+    }
+    return null;
   } catch (error) {
     console.error('Error fetching products:', error);
     return null;

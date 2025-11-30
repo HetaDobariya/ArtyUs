@@ -60,7 +60,7 @@ const TraderInfo = () => {
     const fetchTraderData = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/current-user`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/user/current-user`, {
           method: 'GET',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
@@ -69,6 +69,11 @@ const TraderInfo = () => {
         const data = await response.json();
         if (!response.ok) {
           setError(data.message || 'Failed to load trader data.');
+          return;
+        }
+        // Check if user is null (not authenticated)
+        if (!data.user && data.message) {
+          setError(data.message);
           return;
         }
         setTraderData(data.user);
@@ -111,8 +116,16 @@ const TraderInfo = () => {
 
   if (error || !traderData)
     return (
-      <div className="flex justify-center items-center h-screen">
-        <p className="text-red-600">{error || 'Trader data not available.'}</p>
+      <div className="flex flex-col justify-center items-center h-screen gap-4">
+        <p className="text-red-600 text-lg font-semibold">{error || 'Trader data not available.'}</p>
+        {error && error.includes('login') && (
+          <a
+            href="/modules/auth/SignIn"
+            className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-200"
+          >
+            Go to Login Page
+          </a>
+        )}
       </div>
     );
 

@@ -20,7 +20,7 @@ export default function EditServiceModal({ service, onClose, onUpdated }: EditSe
     e.preventDefault();
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/service/update/${service.id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/service/update/${service.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -30,9 +30,13 @@ export default function EditServiceModal({ service, onClose, onUpdated }: EditSe
       if (res.ok) {
         onUpdated();
         onClose();
+      } else {
+        const errorData = await res.json();
+        alert(errorData.error || 'Failed to update service');
       }
     } catch (error) {
       console.error('Failed to update service:', error);
+      alert('Failed to update service. Please try again.');
     }
   };
 

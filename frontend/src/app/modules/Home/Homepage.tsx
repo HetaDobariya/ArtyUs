@@ -15,10 +15,12 @@ function HomePage() {
       <div className="">
         <Image
           src="/image/HomeImages/vect.png"
-          width={1920}  // Added required width
+          width={1920}
           height={1080}
-          className="object-cover object-center w-[100%] h-[60vh] "
+          priority
+          className="object-cover object-center w-full h-[60vh]"
           alt="Everthing that you think IMAGE"
+          style={{ height: 'auto' }}
         />
       </div>
       <div className="flex flex-col justify-center items-center md:block md:absolute md:right-72 md:top-48">

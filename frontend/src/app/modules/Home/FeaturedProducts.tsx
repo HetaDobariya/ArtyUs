@@ -18,17 +18,19 @@ interface Product {
 
 async function fetchProducts(): Promise<Product[]> {
     try {
-        const productsUrl = `${process.env.NEXT_PUBLIC_BACKEND}/product/getproducts`;
+        const productsUrl = `${process.env.NEXT_PUBLIC_BACKEND}/api/product/getproducts`;
 
         const response = await fetch(productsUrl, {
             credentials: 'include',
             cache: 'no-store' // Prevent caching issues
         });
 
-        console.log('API Response status:', response.status);
-        console.log('API Response headers:', response.headers);
-
         if (!response.ok) {
+            // If 404 or other error, return empty array instead of throwing
+            if (response.status === 404) {
+                console.log("No products found (404)");
+                return [];
+            }
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
@@ -37,19 +39,22 @@ async function fetchProducts(): Promise<Product[]> {
 
         let productArray: Product[] = [];
 
-        // Check the actual structure of your API response
-        if (result && result.success && Array.isArray(result.data)) {
+        if (result && result.data && Array.isArray(result.data)) {
+            // Case 1: Response is wrapped, e.g., { data: [...] }
             productArray = result.data;
-            console.log('Found products in result.data:', productArray.length);
+        } else if (result && Array.isArray(result.products)) {
+            // Case 2: Response is wrapped, e.g., { products: [...] }
+            productArray = result.products;
         } else if (Array.isArray(result)) {
+            // Case 3: Response is directly the array [...]
             productArray = result;
             console.log('Found products in root array:', productArray.length);
         } else if (result && Array.isArray(result.products)) {
             productArray = result.products;
             console.log('Found products in result.products:', productArray.length);
         } else {
-            console.log("API returned object that did not contain a product array. Structure:", Object.keys(result));
-            return [];
+            // Case 4: Malformed data, productArray remains []
+            console.log("API returned object that did not contain a product array.");
         }
 
         console.log("Fetched product array:", productArray);
@@ -142,12 +147,7 @@ const FeaturedProducts: React.FC = () => {
                                         alt={product.product_name}
                                         width={200}
                                         height={200}
-                                        className="object-contain max-h-48 transition-transform duration-500 group-hover:scale-105"
-                                        style={{ width: 'auto', height: 'auto' }} // Fix for aspect ratio warning
-                                        onError={(e) => {
-                                            // Fallback if image fails to load
-                                            (e.target as HTMLImageElement).src = '/api/placeholder/200/200';
-                                        }}
+                                        className="object-contain max-h-48 w-auto transition-transform duration-500 group-hover:scale-105"
                                     />
                                 ) : (
                                     <div className="text-gray-400 flex items-center justify-center h-full">

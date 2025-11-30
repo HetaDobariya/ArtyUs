@@ -290,7 +290,7 @@ const AdminDashboard: React.FC = () => {
   // API functions
   const fetchUsers = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/admin/user-details`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/admin/user-details`, {
         credentials: 'include'
       });
       
@@ -318,7 +318,7 @@ const AdminDashboard: React.FC = () => {
 
   const fetchTraders = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/admin/trader-details`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/admin/trader-details`, {
         credentials: 'include'
       });
       
@@ -335,7 +335,7 @@ const AdminDashboard: React.FC = () => {
 
   const fetchServiceProviders = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/admin/serviceprovider-details`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/admin/serviceprovider-details`, {
         credentials: 'include'
       });
       
@@ -352,7 +352,7 @@ const AdminDashboard: React.FC = () => {
 
   const fetchUnverifiedTraders = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/trader/trader-details/unverified`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/trader/trader-details/unverified`, {
         credentials: 'include'
       });
       
@@ -386,7 +386,7 @@ const AdminDashboard: React.FC = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/product/getproducts`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/product/getproducts`, {
         credentials: 'include'
       });
       
@@ -403,7 +403,7 @@ const AdminDashboard: React.FC = () => {
 
   const fetchSlugs = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/category/getSlugs`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/category/getslugs`, {
         credentials: 'include'
       });
       
@@ -429,7 +429,7 @@ const AdminDashboard: React.FC = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/category/getChildCategory`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/category/getChildCategory`, {
         credentials: 'include'
       });
 
@@ -495,7 +495,7 @@ const AdminDashboard: React.FC = () => {
   const handleDeleteUser = async (id: string) => {
     if (confirm('Are you sure you want to delete this user?')) {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/admin/user-details/delete/${id}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/admin/user-details/delete/${id}`, {
           method: 'DELETE',
           credentials: 'include'
         });
@@ -516,7 +516,7 @@ const AdminDashboard: React.FC = () => {
   const handleDeleteTrader = async (id: string) => {
     if (confirm('Are you sure you want to delete this trader?')) {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/admin/trader-details/delete/${id}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/admin/trader-details/delete/${id}`, {
           method: 'DELETE',
           credentials: 'include'
         });
@@ -538,7 +538,7 @@ const AdminDashboard: React.FC = () => {
   const handleDeleteServiceProvider = async (id: string) => {
     if (confirm('Are you sure you want to delete this service provider?')) {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/admin/serviceprovider-details/delete/${id}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/admin/serviceprovider-details/delete/${id}`, {
           method: 'DELETE',
           credentials: 'include'
         });
@@ -559,7 +559,7 @@ const AdminDashboard: React.FC = () => {
 
   const handleVerifyTrader = async (userId: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/trader/trader-details/verify/${userId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/trader/trader-details/verify/${userId}`, {
         method: 'PUT',
         credentials: 'include'
       });
@@ -600,7 +600,7 @@ const AdminDashboard: React.FC = () => {
   const handleDeleteProduct = async (id: string) => {
     if (confirm('Are you sure you want to delete this product?')) {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/product/delete/${id}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/product/delete/${id}`, {
           method: 'DELETE',
           credentials: 'include'
         });
@@ -626,7 +626,7 @@ const AdminDashboard: React.FC = () => {
                         selectedEntity?.product_name ? 'product' : 'user';
       
       if (entityType === 'user') {
-        response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/admin/user-details/update/${selectedEntity.id}`, {
+        response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/admin/user-details/update/${selectedEntity.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -635,7 +635,7 @@ const AdminDashboard: React.FC = () => {
           body: JSON.stringify(updateForm)
         });
       } else if (entityType === 'trader') {
-        response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/admin/trader-details/update/${selectedEntity.trader_id}`, {
+        response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/admin/trader-details/update/${selectedEntity.trader_id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -644,7 +644,7 @@ const AdminDashboard: React.FC = () => {
           body: JSON.stringify(updateForm)
         });
       } else if (entityType === 'serviceprovider') {
-        response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/admin/serviceprovider-details/update/${selectedEntity.service_provider_id}`, {
+        response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/admin/serviceprovider-details/update/${selectedEntity.service_provider_id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -654,7 +654,7 @@ const AdminDashboard: React.FC = () => {
         });
       } else if (entityType === 'product') {
         const { qty, price } = updateForm;
-        response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/product/update/${selectedEntity.id}`, {
+        response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/product/update/${selectedEntity.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -693,7 +693,7 @@ const AdminDashboard: React.FC = () => {
       };
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND}/admin/add-slugs`,
+        `${process.env.NEXT_PUBLIC_BACKEND}/api/admin/add-slugs`,
         {
           method: 'POST',
           headers: {

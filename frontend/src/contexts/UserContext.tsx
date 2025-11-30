@@ -7,7 +7,7 @@ interface User {
   id: string;
   name: string;
   email: string;
-  role: 'user' | 'trader';
+  role: 'user' | 'trader' | 'serviceprovider' | 'service_provider' | 'admin';
   avatar?: string;
 }
 
@@ -26,7 +26,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const fetchCurrentUser = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/user/current-user`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/user/current-user`, {
         method: 'GET',
         credentials: 'include',
         headers: {

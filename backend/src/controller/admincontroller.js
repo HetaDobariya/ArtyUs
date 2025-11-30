@@ -9,7 +9,7 @@ import {
   updateServiceProviderById,
   getAllServiceProviders,
   deleteServiceProviderById
-} from "../models/adminModel.js";
+} from "../models/adminmodel.js";
 
 export const getAllUsers = async (req, res) => {
   try {

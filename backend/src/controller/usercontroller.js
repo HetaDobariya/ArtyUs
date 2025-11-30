@@ -130,6 +130,13 @@ export const login = async (req, res) => {
 
 export const currentUser = async (req, res) => {
   try {
+    // If user is not authenticated, return null with a message
+    if (!req.user) {
+      return res.json({ 
+        user: null,
+        message: 'Please login to access this feature'
+      });
+    }
     res.json({ user: req.user });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });

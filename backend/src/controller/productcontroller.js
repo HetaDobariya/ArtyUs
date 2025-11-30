@@ -115,10 +115,6 @@ export const getProductsByTraderId = async (req, res) => {
   }
 };
 
-
-// KRUTARTH
-
-
 // Get products by category (slug)
 export const getProductsByCategory = async (req, res) => {
   try {
@@ -180,14 +176,30 @@ export const getProduct = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: product
+      data: product,
     });
   } catch (error) {
-    console.error('Error fetching product:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch product',
-      error: error.message
-    });
+    console.error("Error fetching product:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
+
+// Get all categories (slugs)
+export const getCategories = async (req, res) => {
+  try {
+    const categories = await getAllSlugs();
+    
+    res.status(200).json({
+      success: true,
+      count: categories.length,
+      data: categories,
+    });
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Alias for getAllProducts (for route compatibility)
+export const getProducts = getAllProducts;
+
