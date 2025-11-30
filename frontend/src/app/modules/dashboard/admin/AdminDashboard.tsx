@@ -403,7 +403,7 @@ const AdminDashboard: React.FC = () => {
 
   const fetchSlugs = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/category/getSlugs`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/category/getslugs`, {
         credentials: 'include'
       });
       

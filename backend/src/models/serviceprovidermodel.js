@@ -136,3 +136,57 @@ export const getServiceProviderByUserIdFromDB = async (userId) => {
   const [rows] = await pool.query(sql, [userId]);
   return rows[0];
 };
+
+
+export const getServiceProviderOrdersModel = async (service_provider_id) => {
+  const query = `
+    SELECT 
+      sb.id as booking_id,
+      sb.request_title,
+      sb.request_details,
+      sb.price_range,
+      sb.time_range,
+      sb.support_pdf_url,
+      sb.contact_pref,
+      sb.status,
+      sb.created_at,
+      u.name as customer_name,
+      u.email as customer_email,
+      u.contact as customer_contact,
+      u.address as customer_address
+    FROM service_booking sb
+    JOIN user u ON sb.user_id = u.id
+    WHERE sb.service_provider_id = ?
+    ORDER BY sb.created_at DESC
+  `;
+
+  const [rows] = await pool.query(query, [service_provider_id]);
+  
+  return rows.map(row => ({
+    booking_id: row.booking_id,
+    request_title: row.request_title,
+    request_details: row.request_details,
+    price_range: row.price_range,
+    time_range: row.time_range,
+    support_pdf_url: row.support_pdf_url,
+    contact_pref: row.contact_pref,
+    status: row.status,
+    created_at: row.created_at,
+    customer_name: row.customer_name,
+    customer_email: row.customer_email,
+    customer_contact: row.customer_contact,
+    customer_address: row.customer_address
+  }));
+};
+
+export const updateBookingStatusModel = async (bookingId, service_provider_id, status) => {
+  const query = `
+    UPDATE service_booking 
+    SET status = ? 
+    WHERE id = ? AND service_provider_id = ?
+  `;
+  
+  const [result] = await pool.query(query, [status, bookingId, service_provider_id]);
+  
+  return result.affectedRows > 0;
+};

@@ -1,5 +1,5 @@
 import express from 'express';
-import { signup,updateTrader, verifyTrader,getUnverifiedTraders} from '../controller/tradercontroller.js';
+import { signup,updateTrader, verifyTrader,getUnverifiedTraders,getTraderOrders, } from '../controller/tradercontroller.js';
 import { verifyToken } from '../middleware/verifytoken.js';
 
 const router = express.Router();
@@ -9,6 +9,9 @@ router.put('/update',verifyToken,updateTrader)
 
 router.put("/trader-details/verify/:id", verifyTrader);
 router.get("/trader-details/unverified", getUnverifiedTraders);
+
+router.get('/my-orders', verifyToken, getTraderOrders);
+
 
 
 export default router;

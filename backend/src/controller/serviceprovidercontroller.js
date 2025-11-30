@@ -6,7 +6,9 @@ import {
   getUnverifiedServiceProviderList,
   getAllServiceProvidersFromDB,
   getServiceProviderByIdFromDB,
-  getServiceProviderByUserIdFromDB
+  getServiceProviderByUserIdFromDB,
+   getServiceProviderOrdersModel,
+  updateBookingStatusModel 
 } from '../models/serviceprovidermodel.js';
 import bcrypt from 'bcrypt';
 
@@ -182,5 +184,82 @@ export const getServiceProviderByUserId = async (req, res) => {
   } catch (error) {
     console.error('Fetch service provider by User ID error:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const getServiceProviderOrders = async (req, res) => {
+  try {
+    const service_provider_id = req.user?.serviceProvider?.sp_id;
+
+    if (!service_provider_id) {
+      return res.status(403).json({ 
+        success: false, 
+        error: 'Unauthorized: Service Provider not found or user is not a service provider' 
+      });
+    }
+
+    const orders = await getServiceProviderOrdersModel(service_provider_id);
+
+    res.status(200).json({
+      success: true,
+      data: orders
+    });
+  } catch (error) {
+    console.error('Error fetching service provider orders:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Internal server error' 
+    });
+  }
+};
+
+export const updateBookingStatus = async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+    const { status } = req.body;
+    const service_provider_id = req.user?.serviceProvider?.sp_id;
+
+    if (!service_provider_id) {
+      return res.status(403).json({ 
+        success: false, 
+        error: 'Unauthorized: Service Provider not found' 
+      });
+    }
+
+    if (!status) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Status is required' 
+      });
+    }
+
+    const validStatuses = ['pending', 'accepted', 'rejected', 'completed', 'cancelled'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Invalid status. Must be one of: pending, accepted, rejected, completed, cancelled' 
+      });
+    }
+
+    const updated = await updateBookingStatusModel(bookingId, service_provider_id, status);
+
+    if (!updated) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Booking not found or you are not authorized to update this booking' 
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Booking status updated successfully',
+      data: { bookingId, status }
+    });
+  } catch (error) {
+    console.error('Error updating booking status:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Internal server error' 
+    });
   }
 };
