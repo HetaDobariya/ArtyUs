@@ -9,9 +9,56 @@ import Image from 'next/image';
 import Link from 'next/link';
 import logo from '../../public/Arty-US_logo.png';
 import { Fragment, useState, useEffect } from 'react';
-import { useUser } from '@/contexts/UserContext'; // ✅ added
+import { useUser } from '@/contexts/UserContext';
 
-// Your existing navigation data remains unchanged
+interface ApiCategory {
+  id: number;
+  name: string;
+  created_at: string;
+}
+
+interface ApiChildCategory {
+  id: number;
+  name: string;
+  category_id: number;
+  created_at: string;
+}
+
+interface ApiSlug {
+  id: number;
+  slug_name: string;
+  child_category_name: string;
+}
+
+interface UiItem {
+  name: string;
+  href: string;
+}
+
+interface UiSection {
+  id: string;
+  name: string;
+  items: UiItem[];
+}
+
+interface UiFeatured {
+  name: string;
+  href: string;
+  imageSrc: string;
+  imageAlt: string;
+}
+
+interface UiCategory {
+  id: string | number;
+  name: string;
+  featured: UiFeatured[];
+  sections: UiSection[];
+}
+
+interface NavigationData {
+  categories: UiCategory[];
+}
+
 const navigation = {
   categories: [
     {
@@ -62,6 +109,7 @@ const navigation = {
         },
       ],
     },
+
     {
       id: 'art&craft',
       name: 'Art & Craft',
@@ -90,17 +138,9 @@ const navigation = {
             { name: 'Spray Paints' },
           ],
         },
-        {
-          id: 'sketchSupplies',
-          name: 'Sketch Supplies',
-          items: [
-            { name: 'Craft Papers' },
-            { name: 'Canvas Boards' },
-            { name: 'Sketch Books' },
-          ],
-        },
       ],
     },
+
     {
       id: 'Planners',
       name: 'Planners',
@@ -142,6 +182,7 @@ const navigation = {
         },
       ],
     },
+
     {
       id: 'Kits and hampers',
       name: 'Kits and hampers',
@@ -163,7 +204,10 @@ const navigation = {
         {
           id: 'essential kits',
           name: 'Essential Kits',
-          items: [{ name: 'Stationary Kits' }, { name: 'Art-and-Craft Kits' }],
+          items: [
+            { name: 'Stationary Kits' },
+            { name: 'Art-and-Craft Kits' },
+          ],
         },
       ],
     },
@@ -177,8 +221,97 @@ function classNames(...classes: string[]) {
 export default function Navigation() {
   const [open, setOpen] = useState(false);
 
-  // ✅ Integrated from first file
   const { user, setUser, loading } = useUser();
+  const [dynamicNavigation, setDynamicNavigation] = useState<NavigationData>({ categories: [] });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
+
+  // Set client-side flag to prevent hydration mismatches
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    const fetchNavData = async () => {
+      try {
+        setIsLoading(true);
+
+        const catUrl = `${process.env.NEXT_PUBLIC_BACKEND}/category/getCategory`;
+        const childCatUrl = `${process.env.NEXT_PUBLIC_BACKEND}/category/getChildCategory`;
+        const slugsUrl = `${process.env.NEXT_PUBLIC_BACKEND}/category/getslugs`;
+
+        const [catRes, childCatRes, slugsRes] = await Promise.all([
+          fetch(catUrl, { credentials: 'include' }),
+          fetch(childCatUrl, { credentials: 'include' }),
+          fetch(slugsUrl, { credentials: 'include' })
+        ]);
+
+        // Handle responses - 404 means no data, which is acceptable
+        let catData, childCatData, slugsData;
+        
+        try {
+          catData = catRes.ok ? await catRes.json() : { data: [] };
+        } catch (e) {
+          catData = { data: [] };
+        }
+        
+        try {
+          childCatData = childCatRes.ok ? await childCatRes.json() : { data: [] };
+        } catch (e) {
+          childCatData = { data: [] };
+        }
+        
+        try {
+          slugsData = slugsRes.ok ? await slugsRes.json() : { data: [] };
+        } catch (e) {
+          slugsData = { data: [] };
+        }
+
+        const mainCategories: ApiCategory[] = (catData?.data || (Array.isArray(catData) ? catData : [])) || [];
+        const allChildCategories: ApiChildCategory[] = (childCatData?.data || (Array.isArray(childCatData) ? childCatData : [])) || [];
+        const allSlugs: ApiSlug[] = (slugsData?.data || (Array.isArray(slugsData) ? slugsData : [])) || [];
+
+        const structuredCategories: UiCategory[] = mainCategories.map(mainCat => {
+          const childrenForThisCat = allChildCategories.filter(
+            child => child.category_id === mainCat.id
+          );
+
+          const uiSections: UiSection[] = childrenForThisCat.map(childSection => {
+            const slugsForThisChild = allSlugs.filter(
+              slug => slug.child_category_name === childSection.name
+            );
+
+            const items: UiItem[] = slugsForThisChild.map(slug => ({
+              name: slug.slug_name,
+              href: `/products?category=${slug.slug_name}`
+            }));
+
+            return {
+              id: childSection.name.replace(/\s+/g, ''),
+              name: childSection.name,
+              items: items
+            };
+          });
+
+          return {
+            id: mainCat.id,
+            name: mainCat.name,
+            featured: [],
+            sections: uiSections
+          };
+        });
+
+        setDynamicNavigation({ categories: structuredCategories });
+        
+      } catch (err) {
+        console.error("Failed to fetch nav data. Navigation will be empty.", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchNavData();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -236,7 +369,14 @@ export default function Navigation() {
               {/* Logo */}
               <div className="ml-4 flex lg:ml-0">
                 <Link href="/">
-                  <Image src={logo} alt="Logo" height={140} width={140} />
+                  <Image 
+                    src={logo} 
+                    alt="Logo" 
+                    height={140} 
+                    width={140}
+                    priority
+                    className="h-auto w-auto"
+                  />
                 </Link>
               </div>
 
@@ -322,6 +462,14 @@ export default function Navigation() {
                       )}
                     </Popover>
                   ))}
+                  
+                  {/* Services Link - Added at the end */}
+                  <Link
+                    href="/modules/services"
+                    className="flex items-center border-b-2 border-transparent pt-px text-sm font-medium text-gray-700 hover:text-gray-900 hover:border-gray-300 transition-colors duration-200"
+                  >
+                    Services
+                  </Link>
                 </div>
               </Popover.Group>
 

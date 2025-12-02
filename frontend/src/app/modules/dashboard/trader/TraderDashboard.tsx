@@ -129,6 +129,11 @@ const TraderDashboard: React.FC = () => {
   const fetchCategories = async () => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/category/getslugs`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch categories');
+      }
+      
       const data = await response.json();
 
       if (data.success) {

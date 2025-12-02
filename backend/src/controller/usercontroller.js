@@ -107,9 +107,9 @@ export const login = async (req, res) => {
     const token = jwt.sign(userPayload, SECRET_KEY, { expiresIn: '1h' });
 
     res.cookie('token', token, {
-      httpOnly: false,
-      secure: false,
-      sameSite: 'Lax',
+      httpOnly: true,
+      secure: true,
+      sameSite: 'None',
       maxAge: 60 * 60 * 1000
     });
 
@@ -130,6 +130,13 @@ export const login = async (req, res) => {
 
 export const currentUser = async (req, res) => {
   try {
+    // If user is not authenticated, return null with a message
+    if (!req.user) {
+      return res.json({ 
+        user: null,
+        message: 'Please login to access this feature'
+      });
+    }
     res.json({ user: req.user });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
@@ -163,9 +170,9 @@ export const updateUser = async (req, res) => {
 export const logout = async (req, res) => {
   try {
     res.clearCookie('token', {
-      httpOnly: false, // match with how you set it
-      secure: false,   // true in production (HTTPS)
-      sameSite: 'Lax',
+      httpOnly: true, // match with how you set it
+      secure: true,   // true in production (HTTPS)
+      sameSite: 'None',
     });
 
     res.status(200).json({ message: 'Logout successful' });

@@ -6,6 +6,30 @@ import EditTraderDetails from './EditTraderDetails';
 import TraderDashboard from './TraderDashboard';
 import Sidebar from '@/components/Sidebar';
 
+interface OrderItem {
+  order_id: number;
+  product_id: number;
+  product_name: string;
+  image_url: string;
+  category: string;
+  quantity: number;
+  price: number;
+  total: number;
+}
+
+interface TraderOrder {
+  order_id: number;
+  order_group_id: string;
+  customer_name: string;
+  customer_email: string;
+  contact: string;
+  address: string;
+  created_at: string;
+  items: OrderItem[];
+  total_amount: number;
+  item_count: number;
+}
+
 interface TraderData {
   id: string;
   name: string;
@@ -24,7 +48,9 @@ interface TraderData {
 
 const TraderInfo = () => {
   const [traderData, setTraderData] = useState<TraderData | null>(null);
+  const [orders, setOrders] = useState<TraderOrder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [ordersLoading, setOrdersLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState<'profile' | 'orders' | 'dashboard'>('profile');
@@ -71,6 +97,11 @@ const TraderInfo = () => {
           setError(data.message || 'Failed to load trader data.');
           return;
         }
+        // Check if user is null (not authenticated)
+        if (!data.user && data.message) {
+          setError(data.message);
+          return;
+        }
         setTraderData(data.user);
       } catch (err) {
         console.error('Error fetching trader data:', err);
@@ -102,6 +133,47 @@ const TraderInfo = () => {
     }
   }, []);
 
+  // Fetch trader orders when orders tab is selected
+  useEffect(() => {
+    if (selectedTab === 'orders' && traderData?.trader?.trader_id) {
+      fetchTraderOrders();
+    }
+  }, [selectedTab, traderData]);
+
+  const fetchTraderOrders = async () => {
+    setOrdersLoading(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/trader/my-orders`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      const data = await response.json();
+      if (response.ok && data.success) {
+        setOrders(data.data || []);
+      } else {
+        console.error('Failed to fetch orders:', data.error);
+        setOrders([]);
+      }
+    } catch (err) {
+      console.error('Error fetching trader orders:', err);
+      setOrders([]);
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   if (loading)
     return (
       <div className="flex justify-center items-center h-screen">
@@ -111,8 +183,16 @@ const TraderInfo = () => {
 
   if (error || !traderData)
     return (
-      <div className="flex justify-center items-center h-screen">
-        <p className="text-red-600">{error || 'Trader data not available.'}</p>
+      <div className="flex flex-col justify-center items-center h-screen gap-4">
+        <p className="text-red-600 text-lg font-semibold">{error || 'Trader data not available.'}</p>
+        {error && error.includes('login') && (
+          <a
+            href="/modules/auth/SignIn"
+            className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-200"
+          >
+            Go to Login Page
+          </a>
+        )}
       </div>
     );
 
@@ -179,30 +259,92 @@ const TraderInfo = () => {
             <h3 className="text-3xl font-bold text-gray-800 mb-8 pb-2 border-b-2 border-gray-300">
               My Orders
             </h3>
-            <table className="min-w-full text-left border border-gray-200 rounded-lg">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="py-3 px-4 border-b">Order ID</th>
-                  <th className="py-3 px-4 border-b">Date</th>
-                  <th className="py-3 px-4 border-b">Product</th>
-                  <th className="py-3 px-4 border-b">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="py-3 px-4 border-b">#ORD-101</td>
-                  <td className="py-3 px-4 border-b">2025-11-03</td>
-                  <td className="py-3 px-4 border-b">Bluetooth Speaker</td>
-                  <td className="py-3 px-4 border-b text-green-600 font-semibold">Delivered</td>
-                </tr>
-                <tr>
-                  <td className="py-3 px-4 border-b">#ORD-098</td>
-                  <td className="py-3 px-4 border-b">2025-11-01</td>
-                  <td className="py-3 px-4 border-b">Wireless Mouse</td>
-                  <td className="py-3 px-4 border-b text-yellow-600 font-semibold">Pending</td>
-                </tr>
-              </tbody>
-            </table>
+            
+            {ordersLoading ? (
+              <div className="flex justify-center items-center py-8">
+                <p className="text-gray-600">Loading orders...</p>
+              </div>
+            ) : orders.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-600">No orders found.</p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {orders.map((order) => (
+                  <div key={order.order_id} className="border border-gray-200 rounded-lg p-6 bg-gray-50">
+                    {/* Order Header */}
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h4 className="text-lg font-semibold text-gray-900">
+                          Order #{order.order_id}
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          {formatDate(order.created_at)}
+                        </p>
+                      </div>
+                      <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                        PLACED
+                      </div>
+                    </div>
+
+                    {/* Customer Information */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <h5 className="font-medium text-gray-900 mb-2">Customer Information</h5>
+                        <p className="text-sm text-gray-600"><strong>Name:</strong> {order.customer_name}</p>
+                        <p className="text-sm text-gray-600"><strong>Email:</strong> {order.customer_email}</p>
+                        <p className="text-sm text-gray-600"><strong>Contact:</strong> {order.contact}</p>
+                      </div>
+                      <div>
+                        <h5 className="font-medium text-gray-900 mb-2">Delivery Address</h5>
+                        <p className="text-sm text-gray-600">{order.address}</p>
+                      </div>
+                    </div>
+
+                    {/* Order Items */}
+                    <div className="border-t border-gray-200 pt-4">
+                      <h5 className="font-medium text-gray-900 mb-3">Order Items ({order.item_count})</h5>
+                      <div className="space-y-3">
+                        {order.items.map((item) => (
+                          <div key={item.order_id} className="flex items-center gap-4 py-3 border-b border-gray-100">
+                            <Image
+                              src={item.image_url || '/api/placeholder/60/60'}
+                              alt={item.product_name}
+                              width={60}
+                              height={60}
+                              className="object-cover rounded border border-gray-200"
+                            />
+                            <div className="flex-1">
+                              <h6 className="font-medium text-gray-900">{item.product_name}</h6>
+                              <p className="text-sm text-gray-600">Category: {item.category}</p>
+                              <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-medium text-gray-900">₹{item.price.toFixed(2)}</p>
+                              <p className="text-sm text-gray-600">Total: ₹{item.total.toFixed(2)}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Order Footer */}
+                    <div className="border-t border-gray-200 pt-4 flex justify-between items-center">
+                      <div>
+                        <p className="text-sm text-gray-600">
+                          Order Group ID: {order.order_group_id}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-gray-900">
+                          Total Amount: ₹{order.total_amount.toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ) : (
           <div className="bg-white p-8 rounded-lg shadow-md">

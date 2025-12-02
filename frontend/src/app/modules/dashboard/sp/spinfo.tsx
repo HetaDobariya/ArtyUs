@@ -71,6 +71,11 @@ const SPInfo = () => {
           setError(data.message || 'Failed to load service provider data.');
           return;
         }
+        // Check if user is null (not authenticated)
+        if (!data.user && data.message) {
+          setError(data.message);
+          return;
+        }
         setSPData(data.user);
       } catch (err) {
         console.error('Error fetching SP data:', err);
@@ -111,8 +116,16 @@ const SPInfo = () => {
 
   if (error || !spData)
     return (
-      <div className="flex justify-center items-center h-screen">
-        <p className="text-red-600">{error || 'Service Provider data not available.'}</p>
+      <div className="flex flex-col justify-center items-center h-screen gap-4">
+        <p className="text-red-600 text-lg font-semibold">{error || 'Service Provider data not available.'}</p>
+        {error && error.includes('login') && (
+          <a
+            href="/modules/auth/SignIn"
+            className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-200"
+          >
+            Go to Login Page
+          </a>
+        )}
       </div>
     );
 

@@ -129,7 +129,21 @@ export default function ServiceProviderSignUp() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(submissionData),
+                credentials: 'include',
             });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                let errorData;
+                try {
+                    errorData = JSON.parse(errorText);
+                } catch {
+                    errorData = { message: `Server error: ${response.status}` };
+                }
+                console.error("Service provider signup failed:", errorData);
+                alert(errorData.message || errorData.error || 'Signup failed!');
+                return;
+            }
 
             const data = await response.json();
 

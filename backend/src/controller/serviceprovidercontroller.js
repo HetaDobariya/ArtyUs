@@ -4,6 +4,11 @@ import {
   createServiceProvider,
   verifyServiceProviderById,
   getUnverifiedServiceProviderList,
+  getAllServiceProvidersFromDB,
+  getServiceProviderByIdFromDB,
+  getServiceProviderByUserIdFromDB,
+   getServiceProviderOrdersModel,
+  updateBookingStatusModel 
 } from '../models/serviceprovidermodel.js';
 import bcrypt from 'bcrypt';
 
@@ -115,3 +120,146 @@ export const getUnverifiedServiceProviders = async (req, res) => {
 };
 
 
+export const getAllServiceProviders = async (req, res) => {
+  try {
+    const providers = await getAllServiceProvidersFromDB();
+
+    if (!providers.length) {
+      return res.status(404).json({ message: 'No service providers found' });
+    }
+
+    res.status(200).json({
+      success: true,
+      count: providers.length,
+      data: providers,
+    });
+  } catch (error) {
+    console.error('Fetch all service providers error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const getServiceProviderById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ error: 'Service Provider ID required' });
+    }
+
+    const provider = await getServiceProviderByIdFromDB(id);
+
+    if (!provider) {
+      return res.status(404).json({ error: 'Service Provider not found' });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: provider,
+    });
+  } catch (error) {
+    console.error('Fetch service provider by ID error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const getServiceProviderByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID required' });
+    }
+
+    const provider = await getServiceProviderByUserIdFromDB(userId);
+
+    if (!provider) {
+      return res.status(404).json({ error: 'Service Provider not found' });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: provider,
+    });
+  } catch (error) {
+    console.error('Fetch service provider by User ID error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const getServiceProviderOrders = async (req, res) => {
+  try {
+    const service_provider_id = req.user?.serviceProvider?.sp_id;
+
+    if (!service_provider_id) {
+      return res.status(403).json({ 
+        success: false, 
+        error: 'Unauthorized: Service Provider not found or user is not a service provider' 
+      });
+    }
+
+    const orders = await getServiceProviderOrdersModel(service_provider_id);
+
+    res.status(200).json({
+      success: true,
+      data: orders
+    });
+  } catch (error) {
+    console.error('Error fetching service provider orders:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Internal server error' 
+    });
+  }
+};
+
+export const updateBookingStatus = async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+    const { status } = req.body;
+    const service_provider_id = req.user?.serviceProvider?.sp_id;
+
+    if (!service_provider_id) {
+      return res.status(403).json({ 
+        success: false, 
+        error: 'Unauthorized: Service Provider not found' 
+      });
+    }
+
+    if (!status) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Status is required' 
+      });
+    }
+
+    const validStatuses = ['pending', 'accepted', 'rejected', 'completed', 'cancelled'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Invalid status. Must be one of: pending, accepted, rejected, completed, cancelled' 
+      });
+    }
+
+    const updated = await updateBookingStatusModel(bookingId, service_provider_id, status);
+
+    if (!updated) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Booking not found or you are not authorized to update this booking' 
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Booking status updated successfully',
+      data: { bookingId, status }
+    });
+  } catch (error) {
+    console.error('Error updating booking status:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Internal server error' 
+    });
+  }
+};

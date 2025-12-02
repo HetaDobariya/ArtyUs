@@ -1,4 +1,5 @@
-import { findUserByEmail, createUser, createTrader, updateTraderById, verifyTraderById ,getUnverifiedTraderList  } from '../models/tradermodel.js';
+import { findUserByEmail, createUser, createTrader, updateTraderById, verifyTraderById ,getUnverifiedTraderList, getTraderOrdersModel,
+     } from '../models/tradermodel.js';
 import bcrypt from 'bcrypt';
 
 export const signup = async (req, res) => {
@@ -89,6 +90,33 @@ export const getUnverifiedTraders = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Server error while fetching unverified traders",
+    });
+  }
+};
+
+
+export const getTraderOrders = async (req, res) => {
+  try {
+    const trader_id = req.user?.trader?.trader_id;
+
+    if (!trader_id) {
+      return res.status(403).json({ 
+        success: false, 
+        error: 'Unauthorized: Trader not found or user is not a trader' 
+      });
+    }
+
+    const orders = await getTraderOrdersModel(trader_id);
+
+    res.status(200).json({
+      success: true,
+      data: orders
+    });
+  } catch (error) {
+    console.error('Error fetching trader orders:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Internal server error' 
     });
   }
 };

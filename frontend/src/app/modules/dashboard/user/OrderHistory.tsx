@@ -69,7 +69,8 @@ export default function OrderHistory() {
                     fontWeight: 'bold'
                 }}
             >
-                {status}
+                {status?.toString()}
+
             </span>
         );
     };
